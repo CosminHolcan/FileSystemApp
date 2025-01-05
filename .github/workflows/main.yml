@@ -14,6 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step to cache client-side npm dependencies
       - name: Cache npm dependencies client
         uses: actions/cache@v2
         with:
@@ -22,40 +23,48 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-client-
 
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
 
+      # Build React app
       - name: Build React app
         working-directory: ./client
         run: |
           npm install
           CI=false npm run build
 
+      # Ensure wwwroot directory exists inside the API project
       - name: Ensure wwwroot directory exists
-        run: mkdir -p ./server/wwwroot
-    
-      - name: Clear existing frontend files
-        run: rm -rf ./server/wwwroot/*
-    
-      - name: Copy React build files to wwwroot
-        run: cp -r ./client/build/* ./server/wwwroot/
+        run: mkdir -p ./server/server/wwwroot
 
+      # Clear existing frontend files in wwwroot directory (optional)
+      - name: Clear existing frontend files
+        run: rm -rf ./server/server/wwwroot/*
+
+      # Copy React build files to wwwroot directory
+      - name: Copy React build files to wwwroot
+        run: cp -r ./client/build/* ./server/server/wwwroot/
+
+      # Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.100'
 
+      # Build and publish the .NET backend API project
       - name: Build and publish the backend
         working-directory: ./server/server
         run: |
           dotnet restore
-          dotnet publish -c Release -o publish
+          dotnet publish -c Release -o ./server/server/publish
 
+      # Deploy to Azure App Service
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
           app-name: FileSystemApp
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: ./server/publish
+          package: ./server/server/publish
