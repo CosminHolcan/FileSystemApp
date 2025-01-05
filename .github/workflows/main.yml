@@ -59,7 +59,7 @@ jobs:
         working-directory: ./server/server
         run: |
           dotnet restore
-          dotnet publish -c Release -o ./server/server/publish
+          dotnet publish -c Release -o publish
 
       # Deploy to Azure App Service
       - name: Deploy to Azure App Service
