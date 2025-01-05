@@ -48,7 +48,7 @@ jobs:
           dotnet-version: '8.0.100'
 
       - name: Build and publish the backend
-        working-directory: ./server
+        working-directory: ./server/server
         run: |
           dotnet restore
           dotnet publish -c Release -o publish
