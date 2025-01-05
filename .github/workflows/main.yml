@@ -1,0 +1,71 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow when changes are pushed to the main branch.
+
+jobs:
+  deploy:
+    name: Deploy Backend and Frontend to Azure
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_ROOT: /usr/share/dotnet
+
+    steps:
+      # Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Setup .NET environment for backend
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0'  # Specify the version of .NET you are using
+
+      # Build and publish the C# backend
+      - name: Build and publish the backend
+        working-directory: ./server
+        run: |
+          dotnet restore
+          dotnet publish -c Release -o publish
+
+      # Deploy backend to Azure App Service
+      - name: Deploy backend to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: FileSystemApp  # Replace with your backend Azure App Service name
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          package: ./server/publish
+
+      # Setup Node.js environment for frontend
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Specify the version of Node.js you are using
+
+      # Install dependencies and build the React app
+      - name: Install dependencies and build the frontend
+        working-directory: ./client
+        run: |
+          npm install
+          npm run build
+
+      - name: Cache npm dependencies client
+        uses: actions/cache@v2
+        with:
+          path: client/node_modules
+          key: ${{ runner.os }}-npm-client-${{ hashFiles('client/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-client-
+
+      # Deploy frontend to Azure App Service
+      - name: Deploy frontend to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: your-frontend-app-name  # Replace with your frontend Azure App Service name
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+          package: ./client/build
