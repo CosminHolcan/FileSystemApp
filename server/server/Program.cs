@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = "Server=tcp:filesystemappserverdb.database.windows.net,1433;Initial Catalog=filesystemappdb;Persist Security Info=False;User ID=dbadmin;Password=Admin_db;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+var connectionString = "Server=tcp:filesystemappdbserver.database.windows.net,1433;Initial Catalog=filesystemappdb;Persist Security Info=False;User ID=dbadmin;Password=Admin_db17;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 builder.Services.AddDbContext<MovieReviewDbContext>(options => options.UseSqlServer(connectionString));
 
 var app = builder.Build();
