@@ -12,6 +12,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+{
+    builder
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .WithOrigins("http://localhost:3000");
+}));
+
 var connectionString = "Server=tcp:filesystemappdbserver.database.windows.net,1433;Initial Catalog=filesystemappdb;Persist Security Info=False;User ID=dbadmin;Password=Admin_db17;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 builder.Services.AddDbContext<FileSystemAppDbContext>(options => options.UseSqlServer(connectionString));
 
@@ -38,6 +46,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 

@@ -33,10 +33,10 @@ export const RegisterPage = (): JSX.Element => {
         }
 
         const registerDTO: IRegisterUserDTO = {
-            Email: email,
-            Password: password,
-            FirstName: "Cosmin",
-            LastName: "Holcan"
+            email: email,
+            password: password,
+            firstName: "Cosmin",
+            lastName: "Holcan"
         };
 
         UsersService.RegisterUser(registerDTO)

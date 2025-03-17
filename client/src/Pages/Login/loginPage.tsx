@@ -19,8 +19,8 @@ export const LoginPage = (): JSX.Element => {
 
         UsersService.LoginUser(loginDTO)
             .then(function (response) {
-                localStorage.setItem("jwt", response.data.Jwt);
-                localStorage.setItem("userName", response.data.FirstName + " " + response.data.LastName);
+                localStorage.setItem("jwt", response.data.jwt);
+                localStorage.setItem("userName", response.data.firstName + " " + response.data.lastName);
                 navigate("/home");
             })
             .catch(function (error) {
