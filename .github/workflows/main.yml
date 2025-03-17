@@ -16,7 +16,7 @@ jobs:
 
       # Step to cache client-side npm dependencies
       - name: Cache npm dependencies client
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: client/node_modules
           key: ${{ runner.os }}-npm-client-${{ hashFiles('client/package-lock.json') }}
