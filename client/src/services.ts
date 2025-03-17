@@ -4,8 +4,8 @@ import { IReview } from "./Models/Review";
 import { ILoginUserDTO } from "./DTO/LoginUserDTO";
 import { IRegisterUserDTO } from "./DTO/RegisterUserDTO";
 
-// const BASE_URL = "https://filesystemapp-erekcgcnhzcnbrgt.westeurope-01.azurewebsites.net";
-const BASE_URL = "https://localhost:7263";
+const BASE_URL = "https://filesystemapp-erekcgcnhzcnbrgt.westeurope-01.azurewebsites.net";
+// const BASE_URL = "https://localhost:7263";
 
 export namespace UsersService {
     const USERS_URL = `${BASE_URL}/Users`;
