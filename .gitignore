@@ -331,7 +331,6 @@ GitHubVS.sln.DotSettings
 /client/build
 /.pnp
 .pnp.js
-.env
 
 # testing
 /coverage
