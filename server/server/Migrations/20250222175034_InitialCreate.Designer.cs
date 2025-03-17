@@ -11,7 +11,7 @@ using server.DAL;
 
 namespace server.Migrations
 {
-    [DbContext(typeof(MovieReviewDbContext))]
+    [DbContext(typeof(FileSystemAppDbContext))]
     [Migration("20250222175034_InitialCreate")]
     partial class InitialCreate
     {

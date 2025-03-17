@@ -5,11 +5,11 @@ namespace DataAbstractionLayer
     public class BaseDAL
     {
         #region Members
-        protected MovieReviewDbContext _dbContext;
+        protected FileSystemAppDbContext _dbContext;
         #endregion
 
         #region Constructors
-        public BaseDAL(MovieReviewDbContext dbContext)
+        public BaseDAL(FileSystemAppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
