@@ -1,27 +1,27 @@
 import { Label, Stack, StackItem, TextField } from "@fluentui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ILoginUserDTO } from "../../DTO/LoginUserDTO";
 import { UsersService } from "../../services";
-import { IUser } from "../../Models/User";
 import { ButtonLoginStyle, ButtonRegisterStyle, EmailContainerStyle, ErrorMessageStyle, LabelStyle, LoginContainerStyle, LoginFormContainerStyle, PasswordContainerStyle } from "./loginPage.styles";
 
 export const LoginPage = (): JSX.Element => {
     const navigate = useNavigate();
-    const [userName, setUserName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     const handleSubmit = async (e: any) => {
-        const loginDTO: IUser = {
-            userName: userName,
-            password: password
+        const loginDTO: ILoginUserDTO = {
+            Email: email,
+            Password: password
         };
 
         UsersService.LoginUser(loginDTO)
             .then(function (response) {
-                localStorage.setItem("userId", response.data.userId);
-                localStorage.setItem("userName", response.data.userName);
-                navigate("/movies");
+                localStorage.setItem("jwt", response.data.Jwt);
+                localStorage.setItem("userName", response.data.FirstName + " " + response.data.LastName);
+                navigate("/home");
             })
             .catch(function (error) {
                 setErrorMessage(error.response.data)
@@ -42,12 +42,12 @@ export const LoginPage = (): JSX.Element => {
             <Stack style={LoginFormContainerStyle}>
                 <StackItem style={EmailContainerStyle}>
                     <Label style={LabelStyle}>
-                        Username
+                        Email
                     </Label>
                     <TextField
                         rows={1}
-                        value={userName}
-                        onChange={(event: any) => { setUserName(event.target.value); handleChangedEmailOrPassword(); }}
+                        value={email}
+                        onChange={(event: any) => { setEmail(event.target.value); handleChangedEmailOrPassword(); }}
                     />
                 </StackItem>
                 <StackItem style={PasswordContainerStyle}>

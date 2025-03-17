@@ -4,21 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { IUser } from "../../Models/User";
 import { UsersService } from "../../services";
 import { ButtonLoginStyle, ButtonRegisterStyle, ErrorMessageStyle, LabelStyle, MiddleFieldContainerStyle, RegisterContainerStyle, RegisterFormContainerStyle, RepeatPasswordContainerStyle } from "./registerPage.styles";
+import { IRegisterUserDTO } from "../../DTO/RegisterUserDTO";
 
 export const RegisterPage = (): JSX.Element => {
     const navigate = useNavigate();
-    const [userName, setUserName] = useState<string>('');
+    const [email, setUserName] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [repeatPassword, setRepeatPassword] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     useEffect(() => {
         setErrorMessage('');
-    }, [userName, password, repeatPassword]);
+    }, [email, password, repeatPassword]);
 
     const handleSubmit = async (e: any) => {
         var newErrorMessage: string = '';
-        if (userName.trim() === "" || password.trim() === "") {
+        if (email.trim() === "" || password.trim() === "") {
             newErrorMessage += "All fields are required, none of them can be empty."
         }
 
@@ -31,15 +32,18 @@ export const RegisterPage = (): JSX.Element => {
             return;
         }
 
-        const registerDTO: IUser = {
-            userName: userName,
-            password: password
+        const registerDTO: IRegisterUserDTO = {
+            Email: email,
+            Password: password,
+            FirstName: "Cosmin",
+            LastName: "Holcan"
         };
 
         UsersService.RegisterUser(registerDTO)
             .then(function (response) {
-                localStorage.setItem('userId', response.data.userId);
-                navigate("/movies");
+                localStorage.setItem("jwt", response.data.Jwt);
+                localStorage.setItem("userName", response.data.FirstName + " " + response.data.LastName);
+                navigate("/home");
             })
             .catch(function (error) {
                 setErrorMessage(error.response.data)
@@ -61,11 +65,11 @@ export const RegisterPage = (): JSX.Element => {
             <Stack style={RegisterFormContainerStyle}>
                 <StackItem style={MiddleFieldContainerStyle}>
                     <Label style={LabelStyle}>
-                        Username
+                        Email
                     </Label>
                     <TextField
                         rows={1}
-                        value={userName}
+                        value={email}
                         onChange={(event: any) => handleChangedEmail(event.target.value)}
                     />
                 </StackItem>

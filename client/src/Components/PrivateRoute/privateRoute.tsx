@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { IPrivateRouteProps } from "./privateRoute.types";
 
 export default function PrivateRoute({ authenticationPath, outlet }: IPrivateRouteProps) {
-    const isAuthenticated: boolean = localStorage.getItem("userId") != null;
+    const isAuthenticated: boolean = localStorage.getItem("jwt") != null;
     
     if (isAuthenticated) {
         return outlet;

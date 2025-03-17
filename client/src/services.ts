@@ -1,18 +1,19 @@
 import axios from "axios";
 import { IMovie } from "./Models/Movie";
 import { IReview } from "./Models/Review";
-import { IUser } from "./Models/User";
+import { ILoginUserDTO } from "./DTO/LoginUserDTO";
+import { IRegisterUserDTO } from "./DTO/RegisterUserDTO";
 
-const BASE_URL = "https://localhost:7213";
+const BASE_URL = "https://filesystemapp-erekcgcnhzcnbrgt.westeurope-01.azurewebsites.net";
 
 export namespace UsersService {
     const USERS_URL = `${BASE_URL}/Users`;
 
-    export const LoginUser = (user: IUser) => {
+    export const LoginUser = (user: ILoginUserDTO) => {
         return axios.post(`${USERS_URL}/login`, user);
     };
 
-    export const RegisterUser = (user: IUser) => {
+    export const RegisterUser = (user: IRegisterUserDTO) => {
         return axios.post(`${USERS_URL}/register`, user);
     };
 };

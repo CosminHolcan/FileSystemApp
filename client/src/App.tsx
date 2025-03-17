@@ -7,10 +7,11 @@ import { MoviesPage } from './Pages/Movies/moviesPage';
 import { RegisterPage } from './Pages/Register/registerPage';
 import { ReviewsPage } from './Pages/Reviews/reviewsPage';
 import { MyReviewsPage } from './Pages/MyReviews/myReviewsPage';
+import { HomePage } from './Pages/Home/homePage';
 
 export const App = (): JSX.Element => {
   const isUserAuthenticated = (): boolean => {
-    return localStorage.getItem("userId") != null;
+    return localStorage.getItem("jwt") != null;
   }
 
   const defaultProtectedRouteProps: Omit<IPrivateRouteProps, 'outlet'> = {
@@ -25,6 +26,7 @@ export const App = (): JSX.Element => {
         <Route path='/' element={isUserAuthenticated() ? <MoviesPage /> : <LoginPage />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
+        <Route path='/home' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<HomePage />} />} />
         <Route path='/movies' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<MoviesPage />} />} />
         <Route path='/myMovies' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<MoviesPage />} />} />
         <Route path='/reviews/:movieId' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<ReviewsPage />} />} />
