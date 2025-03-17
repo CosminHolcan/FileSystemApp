@@ -17,7 +17,7 @@ namespace server.BLL
         public async Task<UserDTO> RegisterUser(RegisterUserDTO dto)
         {
             if (string.IsNullOrEmpty(dto.Email))
-                throw new Exception("Invalid username.");
+                throw new Exception("Invalid email.");
 
             if (string.IsNullOrEmpty(dto.Password))
                 throw new Exception("Invalid password.");

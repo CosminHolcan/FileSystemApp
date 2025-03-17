@@ -12,9 +12,10 @@ namespace server.Controllers
         private UsersBLL _usersBLL;
         private JWTService _jwtService;
 
-        public UsersController(UsersBLL usersBLL)
+        public UsersController(UsersBLL usersBLL, JWTService jwtService)
         {
             this._usersBLL = usersBLL;
+            this._jwtService = jwtService;
         }
 
         [HttpPost("register")]
