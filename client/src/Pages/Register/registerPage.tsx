@@ -1,25 +1,26 @@
 import { Label, Stack, StackItem, TextField } from "@fluentui/react";
-import { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { IUser } from "../../Models/User";
+import { IRegisterUserDTO } from "../../DTO/RegisterUserDTO";
 import { UsersService } from "../../services";
 import { ButtonLoginStyle, ButtonRegisterStyle, ErrorMessageStyle, LabelStyle, MiddleFieldContainerStyle, RegisterContainerStyle, RegisterFormContainerStyle, RepeatPasswordContainerStyle } from "./registerPage.styles";
-import { IRegisterUserDTO } from "../../DTO/RegisterUserDTO";
 
 export const RegisterPage = (): JSX.Element => {
     const navigate = useNavigate();
-    const [email, setUserName] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [repeatPassword, setRepeatPassword] = useState<string>('');
-    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [email, setEmail] = React.useState<string>('');
+    const [password, setPassword] = React.useState<string>('');
+    const [repeatPassword, setRepeatPassword] = React.useState<string>('');
+    const [firstName, setFirstName] = React.useState<string>('');
+    const [lastName, setLastName] = React.useState<string>('');
+    const [errorMessage, setErrorMessage] = React.useState<string>('');
 
-    useEffect(() => {
+    React.useEffect(() => {
         setErrorMessage('');
-    }, [email, password, repeatPassword]);
+    }, [email, password, repeatPassword, firstName, lastName]);
 
     const handleSubmit = async (e: any) => {
         var newErrorMessage: string = '';
-        if (email.trim() === "" || password.trim() === "") {
+        if (email.trim() === "" || password.trim() === "" || firstName.trim() === "" || lastName.trim() === "") {
             newErrorMessage += "All fields are required, none of them can be empty."
         }
 
@@ -35,8 +36,8 @@ export const RegisterPage = (): JSX.Element => {
         const registerDTO: IRegisterUserDTO = {
             email: email,
             password: password,
-            firstName: "Cosmin",
-            lastName: "Holcan"
+            firstName: firstName,
+            lastName: lastName
         };
 
         UsersService.RegisterUser(registerDTO)
@@ -48,12 +49,6 @@ export const RegisterPage = (): JSX.Element => {
             .catch(function (error) {
                 setErrorMessage(error.response.data)
             });
-    }
-
-    const handleChangedEmail = (newValue: string): void => {
-        if (errorMessage !== '')
-            setErrorMessage('');
-        setUserName(newValue);
     }
 
     const redirectLoginPage = () => {
@@ -70,7 +65,27 @@ export const RegisterPage = (): JSX.Element => {
                     <TextField
                         rows={1}
                         value={email}
-                        onChange={(event: any) => handleChangedEmail(event.target.value)}
+                        onChange={(event: any) => setEmail(event.target.value)}
+                    />
+                </StackItem>
+                <StackItem style={MiddleFieldContainerStyle}>
+                    <Label style={LabelStyle}>
+                        First Name
+                    </Label>
+                    <TextField
+                        rows={1}
+                        value={email}
+                        onChange={(event: any) => setFirstName(event.target.value)}
+                    />
+                </StackItem>
+                <StackItem style={MiddleFieldContainerStyle}>
+                    <Label style={LabelStyle}>
+                        Last Name
+                    </Label>
+                    <TextField
+                        rows={1}
+                        value={email}
+                        onChange={(event: any) => setLastName(event.target.value)}
                     />
                 </StackItem>
                 <StackItem style={MiddleFieldContainerStyle}>

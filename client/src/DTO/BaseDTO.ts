@@ -1,3 +1,3 @@
 export interface IBaseDTO {
-    jwt: string
+    jwt: string;
 };

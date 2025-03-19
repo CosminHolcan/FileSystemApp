@@ -24,8 +24,10 @@ var connectionString = "Server=tcp:filesystemappdbserver.database.windows.net,14
 builder.Services.AddDbContext<FileSystemAppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<UsersDAL>();
+builder.Services.AddScoped<AppFilesDAL>();
 
 builder.Services.AddScoped<UsersBLL>();
+builder.Services.AddScoped<AppFilesBLL>();
 
 builder.Services.AddScoped<JWTService>();
 

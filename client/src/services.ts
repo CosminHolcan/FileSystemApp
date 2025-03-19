@@ -1,8 +1,9 @@
 import axios from "axios";
-import { IMovie } from "./Models/Movie";
-import { IReview } from "./Models/Review";
+import { IBaseDTO } from "./DTO/BaseDTO";
 import { ILoginUserDTO } from "./DTO/LoginUserDTO";
 import { IRegisterUserDTO } from "./DTO/RegisterUserDTO";
+import { IMovie } from "./Models/Movie";
+import { IReview } from "./Models/Review";
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -15,6 +16,26 @@ export namespace UsersService {
 
     export const RegisterUser = (user: IRegisterUserDTO) => {
         return axios.post(`${USERS_URL}/register`, user);
+    };
+
+    export const RefreshToken = (dto: IBaseDTO) => {
+        return axios.post(`${USERS_URL}/refreshToken`, dto);
+    }
+};
+
+export namespace AppFilesService {
+    const APP_FILES_URL = `${BASE_URL}/AppFiles`;
+
+    export const Addfile = (dto: FormData) => {
+        return axios.post(`${APP_FILES_URL}/add`, dto, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    };
+
+    export const ReadFilesByUser = (dto: IBaseDTO) => {
+        return axios.post(`${APP_FILES_URL}/filesByUser`, dto);
     };
 };
 

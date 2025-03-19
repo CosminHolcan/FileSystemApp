@@ -1,5 +1,5 @@
 import { Label, Stack, StackItem, TextField } from "@fluentui/react";
-import { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ILoginUserDTO } from "../../DTO/LoginUserDTO";
 import { UsersService } from "../../services";
@@ -7,14 +7,18 @@ import { ButtonLoginStyle, ButtonRegisterStyle, EmailContainerStyle, ErrorMessag
 
 export const LoginPage = (): JSX.Element => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [email, setEmail] = React.useState<string>('');
+    const [password, setPassword] = React.useState<string>('');
+    const [errorMessage, setErrorMessage] = React.useState<string>('');
+
+    React.useEffect(() => {
+        setErrorMessage('');
+    }, [email, password]);
 
     const handleSubmit = async (e: any) => {
         const loginDTO: ILoginUserDTO = {
-            Email: email,
-            Password: password
+            email: email,
+            password: password
         };
 
         UsersService.LoginUser(loginDTO)
@@ -32,11 +36,6 @@ export const LoginPage = (): JSX.Element => {
         navigate("/register");
     }
 
-    const handleChangedEmailOrPassword = (): void => {
-        if (errorMessage !== '')
-            setErrorMessage('');
-    }
-
     return (
         <Stack style={LoginContainerStyle} horizontalAlign="center" verticalAlign="center">
             <Stack style={LoginFormContainerStyle}>
@@ -47,7 +46,7 @@ export const LoginPage = (): JSX.Element => {
                     <TextField
                         rows={1}
                         value={email}
-                        onChange={(event: any) => { setEmail(event.target.value); handleChangedEmailOrPassword(); }}
+                        onChange={(event: any) => { setEmail(event.target.value); }}
                     />
                 </StackItem>
                 <StackItem style={PasswordContainerStyle}>
@@ -59,7 +58,7 @@ export const LoginPage = (): JSX.Element => {
                         canRevealPassword={true}
                         rows={1}
                         value={password}
-                        onChange={(event: any) => { setPassword(event.target.value); handleChangedEmailOrPassword(); }}
+                        onChange={(event: any) => { setPassword(event.target.value); }}
                     />
                 </StackItem>
                 <Stack horizontalAlign="center" horizontal>
