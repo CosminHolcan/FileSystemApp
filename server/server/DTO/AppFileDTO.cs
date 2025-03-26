@@ -8,6 +8,6 @@ namespace server.DTO
 
         public string Name { get; set; }
 
-        public string StorageAccount { get; set; }
+        public Guid StorageAccountId { get; set; }
     }
 }

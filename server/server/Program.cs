@@ -25,9 +25,11 @@ builder.Services.AddDbContext<FileSystemAppDbContext>(options => options.UseSqlS
 
 builder.Services.AddScoped<UsersDAL>();
 builder.Services.AddScoped<AppFilesDAL>();
+builder.Services.AddScoped<StorageAccountsDAL>();
 
 builder.Services.AddScoped<UsersBLL>();
 builder.Services.AddScoped<AppFilesBLL>();
+builder.Services.AddScoped<StorageAccountsBLL>();
 
 builder.Services.AddScoped<JWTService>();
 
@@ -35,8 +37,8 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<FileSystemAppDbContext>();
-    db.Database.Migrate();  // Applies any pending migrations
+    //var db = scope.ServiceProvider.GetRequiredService<FileSystemAppDbContext>();
+    //db.Database.Migrate();  // Applies any pending migrations
 }
 
 // Configure the HTTP request pipeline.

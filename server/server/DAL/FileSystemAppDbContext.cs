@@ -15,5 +15,7 @@ namespace server.DAL
         public DbSet<AppFile> AppFiles { get; set; }
 
         public DbSet<FileVersion> FileVersions { get; set; }
+
+        public DbSet<StorageAccount> StorageAccounts { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 import { initializeIcons } from '@fluentui/react';
+import React from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import PrivateRoute from './Components/PrivateRoute/privateRoute';
 import { IPrivateRouteProps } from './Components/PrivateRoute/privateRoute.types';
@@ -18,17 +19,21 @@ export const App = (): JSX.Element => {
 
   initializeIcons();
 
-  var token = localStorage.getItem("jwt");
-  if (token != null) {
-    UsersService.RefreshToken({ jwt: token })
-      .then(async (response) => {
-        localStorage.setItem("jwt", response.data.jwt);
-      })
-      .catch(async (error) => {
-        localStorage.removeItem("jwt");
-        localStorage.removeItem("userName");
-      })
-  }
+  // localStorage.removeItem("jwt");
+
+  React.useEffect(() => {
+    var token = localStorage.getItem("jwt");
+    if (token != null) {
+      UsersService.RefreshToken({ jwt: token })
+        .then(async (response) => {
+          localStorage.setItem("jwt", response.data.jwt);
+        })
+        .catch(async (error) => {
+          localStorage.removeItem("jwt");
+          localStorage.removeItem("userName");
+        })
+    }
+  }, []);
 
   return (
     <Router>

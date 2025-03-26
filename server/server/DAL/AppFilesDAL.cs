@@ -10,7 +10,7 @@ namespace server.DAL
 
         public async Task<AppFile> AddFile(AppFile appFile)
         {
-            AppFile existingFile = await this._dbContext.AppFiles.FirstOrDefaultAsync(f => f.StorageAccount == appFile.StorageAccount && f.Name == appFile.Name);
+            AppFile existingFile = await this._dbContext.AppFiles.FirstOrDefaultAsync(f => f.StorageAccountId == appFile.StorageAccountId && f.Name == appFile.Name);
             if (existingFile != null)
                 throw new Exception("There is already a file with this title.");
 

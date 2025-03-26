@@ -22,7 +22,7 @@ namespace server.BLL
             {
                 UserId = userId,
                 Name = dto.Name,
-                StorageAccount = dto.StorageAccount
+                StorageAccountId = dto.StorageAccountId
             };
 
             AppFile createdAppFile = await this._appFilesDAL.AddFile(appFile);
@@ -31,7 +31,7 @@ namespace server.BLL
             {
                 Id = createdAppFile.Id,
                 Name = createdAppFile.Name,
-                StorageAccount = createdAppFile.StorageAccount
+                StorageAccountId = createdAppFile.StorageAccountId
             };
         }
 
@@ -43,7 +43,7 @@ namespace server.BLL
             {
                 Id = f.Id,
                 Name = f.Name,
-                StorageAccount = f.StorageAccount
+                StorageAccountId = f.StorageAccountId
             }).ToList();
         }
     }

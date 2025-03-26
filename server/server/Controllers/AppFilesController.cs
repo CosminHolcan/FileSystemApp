@@ -3,6 +3,7 @@ using System.Text.Json;
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Mvc;
 using server.BLL;
+using server.DAL.Entities;
 using server.DTO;
 using server.Utils;
 
@@ -12,13 +13,15 @@ namespace server.Controllers
     [Route("[controller]")]
     public class AppFilesController : Controller
     {
-        private AppFilesBLL _appFilesBLL;
         private JWTService _jwtService;
+        private AppFilesBLL _appFilesBLL;
+        private StorageAccountsBLL _storageAccountsBLL;
 
-        public AppFilesController(AppFilesBLL appFiles, JWTService jwtService)
+        public AppFilesController(JWTService jwtService, AppFilesBLL appFiles, StorageAccountsBLL storageAccountsBLL)
         {
             this._appFilesBLL = appFiles;
             this._jwtService = jwtService;
+            this._storageAccountsBLL = storageAccountsBLL;
         }
 
         [HttpPost("add")]
@@ -38,7 +41,9 @@ namespace server.Controllers
 
                 AppFileDTO appFileDTO = await _appFilesBLL.AddFile(dtoData, userId);
 
-                BlobServiceClient blobServiceClient = new BlobServiceClient(dtoData.StorageAccount);
+                StorageAccount storageAccount = await this._storageAccountsBLL.GetStorageAccountById(dtoData.StorageAccountId);
+
+                BlobServiceClient blobServiceClient = new BlobServiceClient(storageAccount.ConnectionString);
                 BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
                 BlobClient blobClient = containerClient.GetBlobClient(dtoData.Name);
 

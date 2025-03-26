@@ -25,7 +25,7 @@ export const HomePage = (): JSX.Element => {
         const formData = new FormData();
         formData.append('jwt', localStorage.getItem("jwt") as string);
         formData.append('name', name + "." + file?.name.split('.').pop());
-        formData.append('storageAccount', 'DefaultEndpointsProtocol=https;AccountName=fsawelrsnoversioning;AccountKey=nXXASVwJomA7qrN9gQW6T0ZXMzG3pPmPGZMnc+rcq6SKThy/Rtl7opeAd7YYns5moavQ5HPcqlCu+AStfi4X+g==;EndpointSuffix=core.windows.net');
+        formData.append('storageAccountId', '033f1498-0f1f-47cc-bd66-9a1b532e2a0d');
         formData.append('file', file as File);
 
         AppFilesService.Addfile(formData)
