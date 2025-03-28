@@ -14,7 +14,7 @@ namespace server.Utils
             SigningCredentials credentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature);
             JwtHeader header = new JwtHeader(credentials);
 
-            JwtPayload payload = new JwtPayload(userGuid.ToString(), null, null, null, DateTime.Now.AddMinutes(2));
+            JwtPayload payload = new JwtPayload(userGuid.ToString(), null, null, null, DateTime.Now.AddDays(1));
             JwtSecurityToken securityToken = new JwtSecurityToken(header, payload);
 
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
