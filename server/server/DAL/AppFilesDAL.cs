@@ -14,6 +14,13 @@ namespace server.DAL
             if (existingFile != null)
                 throw new Exception("There is already a file with this title.");
 
+            StorageAccount storageAccount = await this._dbContext.StorageAccounts.FirstOrDefaultAsync(sa => sa.Id == appFile.StorageAccountId);
+
+            if (storageAccount == null)
+                throw new Exception("StorageAccount not found.");
+
+            appFile.StorageAccount = storageAccount;
+
             this._dbContext.AppFiles.Add(appFile);
             await this._dbContext.SaveChangesAsync();
 
@@ -22,7 +29,9 @@ namespace server.DAL
 
         public async Task<List<AppFile>> GetFilesByUser(Guid userId)
         {
-            return await this._dbContext.AppFiles.Where(f => f.UserId == userId).ToListAsync();
+            return await this._dbContext.AppFiles
+                .Include(f => f.StorageAccount)
+                .Where(f => f.UserId == userId).ToListAsync();
         }
     }
 }

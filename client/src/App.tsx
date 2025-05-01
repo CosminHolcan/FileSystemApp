@@ -19,8 +19,6 @@ export const App = (): JSX.Element => {
 
   initializeIcons();
 
-  // localStorage.removeItem("jwt");
-
   React.useEffect(() => {
     var token = localStorage.getItem("jwt");
     if (token != null) {
@@ -42,10 +40,6 @@ export const App = (): JSX.Element => {
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/home' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<HomePage />} />} />
-        {/* <Route path='/movies' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<MoviesPage />} />} />
-        <Route path='/myMovies' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<MoviesPage />} />} />
-        <Route path='/reviews/:movieId' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<ReviewsPage />} />} />
-        <Route path='/myReviews' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<MyReviewsPage />} />} /> */}
       </Routes>
     </Router>
   );

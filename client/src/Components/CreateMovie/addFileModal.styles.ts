@@ -22,3 +22,9 @@ export const titleInputStyles: IStyleFunctionOrObject<ITextFieldStyleProps, ITex
         width: '400px'
     }
 };
+
+export const errorMessageClassName: string = mergeStyles({
+    fontSize: 17,
+    color: "red",
+    marginBottom: "15px"
+});

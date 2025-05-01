@@ -1,4 +1,4 @@
-﻿using server.DAL.Entities;
+﻿using server.Enums;
 
 namespace server.DTO
 {
@@ -9,5 +9,13 @@ namespace server.DTO
         public string Name { get; set; }
 
         public Guid StorageAccountId { get; set; }
+
+        public Location? Location { get; set; }
+
+        public Redundancy? Redundancy { get; set; }
+
+        public bool? Versionning { get; set; }
+
+        public string? CreationDate { get; set; }
     }
 }

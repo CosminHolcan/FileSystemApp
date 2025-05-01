@@ -1,7 +1,7 @@
 ﻿using server.DAL;
 using server.DAL.Entities;
 using server.DTO;
-using server.Utils;
+using server.Enums;
 
 namespace server.BLL
 {
@@ -9,20 +9,25 @@ namespace server.BLL
     {
         private UsersDAL _usersDAL;
         private AppFilesDAL _appFilesDAL;
+        private StorageAccountsDAL _storageAccountsDAL;
 
-        public AppFilesBLL(UsersDAL usersDAL, AppFilesDAL appFilesDAL)
+        public AppFilesBLL(UsersDAL usersDAL, AppFilesDAL appFilesDAL, StorageAccountsDAL storageAccountsDAL)
         {
             this._usersDAL = usersDAL;
             this._appFilesDAL = appFilesDAL;
+            _storageAccountsDAL = storageAccountsDAL;
         }
 
         public async Task<AppFileDTO> AddFile(CreateFileDTO dto, Guid userId)
         {
+            StorageAccount storageAccount = await this._storageAccountsDAL.GetStorageAccountByFeatures((Location)dto.Location, (Redundancy)dto.Redundancy, (bool)dto.Versionning);
             AppFile appFile = new AppFile()
             {
                 UserId = userId,
                 Name = dto.Name,
-                StorageAccountId = dto.StorageAccountId
+                StorageAccountId = storageAccount.Id,
+                CreationDate = DateOnly.FromDateTime(DateTime.Now),
+                LastInteraction = DateOnly.FromDateTime(DateTime.Now)
             };
 
             AppFile createdAppFile = await this._appFilesDAL.AddFile(appFile);
@@ -31,7 +36,11 @@ namespace server.BLL
             {
                 Id = createdAppFile.Id,
                 Name = createdAppFile.Name,
-                StorageAccountId = createdAppFile.StorageAccountId
+                StorageAccountId = createdAppFile.StorageAccountId,
+                Location = createdAppFile.StorageAccount.Location,
+                Redundancy = createdAppFile.StorageAccount.Redundancy,
+                Versionning = createdAppFile.StorageAccount.Versioning,
+                CreationDate = createdAppFile.CreationDate.ToShortDateString()
             };
         }
 
@@ -43,7 +52,11 @@ namespace server.BLL
             {
                 Id = f.Id,
                 Name = f.Name,
-                StorageAccountId = f.StorageAccountId
+                StorageAccountId = f.StorageAccountId,
+                CreationDate = f.CreationDate.ToShortDateString(),
+                Location = f.StorageAccount.Location,
+                Redundancy = f.StorageAccount.Redundancy,
+                Versionning = f.StorageAccount.Versioning
             }).ToList();
         }
     }

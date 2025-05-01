@@ -25,7 +25,7 @@ namespace server.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<ActionResult<AppFileDTO>> AddFile([FromForm] IFormFile file, [FromForm] CreateFileDTO dtoData)
+        public async Task<ActionResult<AppFileDTO>> AddFile([FromForm] IFormFile file,[FromForm] string dto)
         {
             try
             {
@@ -34,18 +34,19 @@ namespace server.Controllers
                     return BadRequest("No file provided.");
                 }
 
-                //var dtoData = JsonSerializer.Deserialize<CreateFileDTO>(dtoData, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var dtoData = JsonSerializer.Deserialize<CreateFileDTO>(dto, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                dtoData.Versionning = dtoData.Versionning == null ? false : true;
 
                 JwtSecurityToken token = _jwtService.Verify(dtoData.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
                 AppFileDTO appFileDTO = await _appFilesBLL.AddFile(dtoData, userId);
 
-                StorageAccount storageAccount = await this._storageAccountsBLL.GetStorageAccountById(dtoData.StorageAccountId);
+                StorageAccount storageAccount = await this._storageAccountsBLL.GetStorageAccountById(appFileDTO.StorageAccountId);
 
                 BlobServiceClient blobServiceClient = new BlobServiceClient(storageAccount.ConnectionString);
                 BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-                BlobClient blobClient = containerClient.GetBlobClient(dtoData.Name);
+                BlobClient blobClient = containerClient.GetBlobClient(appFileDTO.Id.ToString() + Path.GetExtension(appFileDTO.Name));
 
                 using (var stream = file.OpenReadStream())
                 {
