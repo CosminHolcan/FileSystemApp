@@ -4,11 +4,11 @@ using System.Text;
 
 namespace server.Utils
 {
-    public class JWTService
+    public static class JWTService
     {
-        private string _securityKey = "LX93ND72KFQ84PJZ51MB07XGD29VY6RT";
+        private const string _securityKey = "LX93ND72KFQ84PJZ51MB07XGD29VY6RT";
 
-        public string Generate(Guid userGuid)
+        public static string Generate(Guid userGuid)
         {
             SymmetricSecurityKey symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_securityKey));
             SigningCredentials credentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature);
@@ -20,7 +20,7 @@ namespace server.Utils
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
 
-        public JwtSecurityToken Verify(string jwtString)
+        public static JwtSecurityToken Verify(string jwtString)
         {
             try
             {

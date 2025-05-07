@@ -30,5 +30,10 @@ namespace server.BLL
         {
             return await this._storageAccountsDAL.GetStorageAcccountById(id);
         }
+
+        public async Task<StorageAccount> GetStorageAccountByFileId(Guid fileId)
+        {
+            return await this._storageAccountsDAL.GetStorageAcccountByFileId(fileId);
+        }
     }
 }

@@ -6,7 +6,7 @@ import { Redundancy } from "../../Enums/Redundancy";
 import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
 import { AppFilesService } from "../../services";
 import { IsNullOrUndefined } from "../../utils";
-import { errorMessageClassName, modalContainerClassName, titleInputStyles } from "./addFileModal.styles";
+import { errorMessageClassName, modalContainerClassName, nameStyles, versionNameStyles } from "./addFileModal.styles";
 import { AddFileModalProps } from "./addFileModal.types";
 
 export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
@@ -15,7 +15,8 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
     const [location, setLocation] = React.useState<FileLocation | null>(null);
     const [redundancy, setRedundancy] = React.useState<Redundancy | null>(null);
     const [versioning, setVersioning] = React.useState<boolean>(false);
-    const [errorMessage, setErrorMessage] = React.useState<String>("");
+    const [errorMessage, setErrorMessage] = React.useState<string>("");
+    const [versionFileName, setVersionFileName] = React.useState<string>("Original");
 
     React.useEffect(() => {
         if (errorMessage !== "") {
@@ -75,6 +76,10 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
             newErrorMessage += " Select a redundancy policy.";
         }
 
+        if (versioning && IsNullOrUndefined(redundancy)) {
+            newErrorMessage += " Version name can't be empty.";
+        }
+
         if (newErrorMessage !== "") {
             setErrorMessage(newErrorMessage);
             return;
@@ -86,7 +91,8 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
             name: name + "." + file?.name.split('.').pop(),
             location: location as FileLocation,
             redundancy: redundancy as Redundancy,
-            versioning: versioning
+            versioning: versioning,
+            versionName: versionFileName
         };
 
         const formData = new FormData();
@@ -108,8 +114,8 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
                 <TextField
                     value={name}
                     onChange={(event, newValue) => setName(newValue ?? "")}
-                    styles={titleInputStyles}
-                    placeholder="Title"
+                    styles={nameStyles}
+                    placeholder="Name"
                 />
                 {!IsNullOrUndefined(file) &&
                     <div style={{ marginLeft: "5px" }}>
@@ -136,11 +142,21 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
                     onChange={onFileChange}
                 />
             </Stack>
-            <Checkbox
-                label="Support versioning"
-                checked={versioning}
-                onChange={handleVersioningChange}
-            />
+            <Stack>
+                <Checkbox
+                    label="Support versioning"
+                    checked={versioning}
+                    onChange={handleVersioningChange}
+                />
+                {versioning &&
+                    <TextField
+                        value={versionFileName}
+                        onChange={(event, newValue) => setVersionFileName(newValue ?? "")}
+                        styles={versionNameStyles}
+                        placeholder="Version Name"
+                    />
+                }
+            </Stack>
             <button className={buttonClassName} onClick={handleSaveFile}>
                 <Icon
                     className={iconClassName}

@@ -11,7 +11,22 @@ export const modalContainerClassName: string = mergeStyles({
     overflowY: 'auto'
 });
 
-export const titleInputStyles: IStyleFunctionOrObject<ITextFieldStyleProps, ITextFieldStyles> = {
+export const nameStyles: IStyleFunctionOrObject<ITextFieldStyleProps, ITextFieldStyles> = {
+    field: {
+        flex: '1',
+        padding: '10px',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        fontSize: '16px',
+        backgroundColor: '#ffffff',
+        width: '400px'
+    }
+};
+
+export const versionNameStyles: IStyleFunctionOrObject<ITextFieldStyleProps, ITextFieldStyles> = {
+    root: {
+        marginTop: "5px",
+    },
     field: {
         flex: '1',
         padding: '10px',

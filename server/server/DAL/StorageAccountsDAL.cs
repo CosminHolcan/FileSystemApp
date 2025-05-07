@@ -19,6 +19,15 @@ namespace server.DAL
             return await _dbContext.StorageAccounts.FirstOrDefaultAsync(s => s.Id == id);
         }
 
+        public async Task<StorageAccount> GetStorageAcccountByFileId(Guid fileId)
+        {
+            AppFile file = await _dbContext.AppFiles
+                .Include(f => f.StorageAccount)
+                .FirstOrDefaultAsync(f => f.Id == fileId);
+
+            return file.StorageAccount;
+        }
+
         public async Task<StorageAccount> GetStorageAccountByFeatures(Location location, Redundancy redundancy, bool versioning)
         {
             return await _dbContext.StorageAccounts.FirstOrDefaultAsync(s => s.Location == location && s.Redundancy == redundancy && s.Versioning == versioning);

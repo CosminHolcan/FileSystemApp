@@ -6,6 +6,7 @@ import { IPrivateRouteProps } from './Components/PrivateRoute/privateRoute.types
 import { HomePage } from './Pages/Home/homePage';
 import { LoginPage } from './Pages/Login/loginPage';
 import { RegisterPage } from './Pages/Register/registerPage';
+import { VersioningPage } from './Pages/Versioning/versioningPage';
 import { UsersService } from './services';
 
 export const App = (): JSX.Element => {
@@ -40,6 +41,7 @@ export const App = (): JSX.Element => {
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/home' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<HomePage />} />} />
+        <Route path='/versioning/:fileId' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<VersioningPage />} />} />
       </Routes>
     </Router>
   );

@@ -8,4 +8,5 @@ export interface IAppFile {
     location?: FileLocation;
     redundancy?: Redundancy;
     versioning?: boolean;
+    versionName?: string;
 };

@@ -26,12 +26,12 @@ builder.Services.AddDbContext<FileSystemAppDbContext>(options => options.UseSqlS
 builder.Services.AddScoped<UsersDAL>();
 builder.Services.AddScoped<AppFilesDAL>();
 builder.Services.AddScoped<StorageAccountsDAL>();
+builder.Services.AddScoped<FileVersionsDAL>();
 
 builder.Services.AddScoped<UsersBLL>();
 builder.Services.AddScoped<AppFilesBLL>();
 builder.Services.AddScoped<StorageAccountsBLL>();
-
-builder.Services.AddScoped<JWTService>();
+builder.Services.AddScoped<FileVersionsBLL>();
 
 var app = builder.Build();
 

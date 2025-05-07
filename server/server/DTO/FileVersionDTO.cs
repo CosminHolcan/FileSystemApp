@@ -1,16 +1,14 @@
-﻿namespace server.DAL.Entities
+﻿using server.DAL.Entities;
+
+namespace server.DTO
 {
-    public class FileVersion
+    public class FileVersionDTO
     {
         public Guid Id { get; set; }
-
         public string Name { get; set; }
-
         public string AzureId { get; set; }
-
         public Guid OriginalFileId { get; set; }
-        public AppFile OriginalFile { get; set; }
-
-        public DateTime CreationTime { get; set; }
+        public string CreationTime { get; set; }
+        public string TokenSAS { get; set; }
     }
 }

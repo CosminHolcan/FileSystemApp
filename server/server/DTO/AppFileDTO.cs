@@ -14,8 +14,10 @@ namespace server.DTO
 
         public Redundancy? Redundancy { get; set; }
 
-        public bool? Versionning { get; set; }
+        public bool? Versioning { get; set; }
 
         public string? CreationDate { get; set; }
+
+        public string? VersionName { get; set; }
     }
 }

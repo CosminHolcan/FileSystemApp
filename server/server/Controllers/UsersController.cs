@@ -11,12 +11,10 @@ namespace server.Controllers
     public class UsersController : ControllerBase
     {
         private UsersBLL _usersBLL;
-        private JWTService _jwtService;
 
-        public UsersController(UsersBLL usersBLL, JWTService jwtService)
+        public UsersController(UsersBLL usersBLL)
         {
             this._usersBLL = usersBLL;
-            this._jwtService = jwtService;
         }
 
         [HttpPost("register")]
@@ -25,7 +23,7 @@ namespace server.Controllers
             try
             {
                 UserDTO userDto = await _usersBLL.RegisterUser(dto);
-                userDto.Jwt = this._jwtService.Generate(userDto.Id);
+                userDto.Jwt = JWTService.Generate(userDto.Id);
 
                 return Ok(userDto);
             }
@@ -41,7 +39,7 @@ namespace server.Controllers
             try
             {
                 UserDTO userDto = await _usersBLL.LoginUser(dto);
-                userDto.Jwt = this._jwtService.Generate(userDto.Id);
+                userDto.Jwt = JWTService.Generate(userDto.Id);
 
                 return Ok(userDto);
             }
@@ -56,9 +54,9 @@ namespace server.Controllers
         {
             try
             {
-                JwtSecurityToken token = _jwtService.Verify(dto.Jwt);
+                JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
-                string newToken = _jwtService.Generate(userId);
+                string newToken = JWTService.Generate(userId);
 
                 return Ok(new BaseDTO
                 {

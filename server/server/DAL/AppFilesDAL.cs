@@ -33,5 +33,20 @@ namespace server.DAL
                 .Include(f => f.StorageAccount)
                 .Where(f => f.UserId == userId).ToListAsync();
         }
+
+        public async Task<AppFile> GetFileByIdWithStorageAccount(Guid fileId)
+        {
+            return await this._dbContext.AppFiles
+                .Include(f => f.StorageAccount)
+                .FirstOrDefaultAsync(f => f.Id == fileId);
+        }
+
+        public async Task<AppFile> GetFullFileById(Guid fileId)
+        {
+            return await this._dbContext.AppFiles
+                .Include(f => f.Versions)
+                .Include(f => f.StorageAccount)
+                .FirstOrDefaultAsync(f => f.Id == fileId);
+        }
     }
 }

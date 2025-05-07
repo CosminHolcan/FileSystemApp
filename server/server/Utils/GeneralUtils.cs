@@ -1,0 +1,23 @@
+﻿namespace server.Utils
+{
+    public static class GeneralUtils
+    {
+        public static string GetContentType(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+            return extension switch
+            {
+                ".txt" => "text/plain",
+                ".pdf" => "application/pdf",
+                ".doc" or ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".xls" or ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".ppt" or ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".gif" => "image/gif",
+                _ => "application/octet-stream",
+            };
+        }
+    }
+}

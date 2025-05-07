@@ -10,12 +10,10 @@ namespace server.Controllers
     [Route("[controller]")]
     public class StorageAccountsController : Controller
     {
-        private JWTService _jwtService;
         private StorageAccountsBLL _storageAccountsBLL;
 
-        public StorageAccountsController(JWTService jWTService, StorageAccountsBLL storageAccountsBLL)
+        public StorageAccountsController(StorageAccountsBLL storageAccountsBLL)
         {
-            this._jwtService = jWTService;
             this._storageAccountsBLL = storageAccountsBLL;
         }
 
@@ -24,7 +22,7 @@ namespace server.Controllers
         {
             try
             {
-                JwtSecurityToken token = _jwtService.Verify(dto.Jwt);
+                JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
                 List<StorageAccountDTO> storageAccountsDTO = await this._storageAccountsBLL.GetAllStorageAccounts();

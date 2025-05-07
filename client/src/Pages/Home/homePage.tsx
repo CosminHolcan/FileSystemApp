@@ -1,7 +1,7 @@
 import { DetailsList, DetailsListLayoutMode, IColumn, Icon, Modal, Stack, StackItem } from "@fluentui/react";
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { AddFileModal } from "../../Components/CreateMovie/addFileModal";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AddFileModal } from "../../Components/AddFileModal/addFileModal";
 import { FileLocation } from "../../Enums/FileLocation";
 import { Redundancy } from "../../Enums/Redundancy";
 import { IAppFile } from "../../Models/AppFile";
@@ -64,7 +64,10 @@ export const HomePage = (): JSX.Element => {
             fieldName: 'versioning',
             minWidth: 200,
             isResizable: true,
-            onRender: item => (item.hasVersioning ? 'Yes' : 'No'),
+            onRender: item =>
+                item.versioning ? (
+                    <Link to={`/versioning/${item.id}`}>Yes</Link>
+                ) : 'No'
         },
         {
             key: 'column5',

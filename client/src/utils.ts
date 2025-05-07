@@ -33,3 +33,17 @@ export const getDisplayStringLocation = (location: FileLocation): string => {
 export const IsNullOrUndefined = (object: any): boolean => {
     return object === null || object === undefined;
 };
+
+export const downloadBlobWithName = async (tokenSAS: string, desiredFileName: string) => {
+    try {
+        const link = document.createElement('a');
+        link.href = tokenSAS;
+        link.download = desiredFileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    catch (error) {
+        console.error('Download failed', error);
+    }
+};
