@@ -1,6 +1,6 @@
-import { DetailsList, DetailsListLayoutMode, Dropdown, IColumn, Icon, IconButton, IDropdownOption, Modal, Stack, StackItem, Toggle } from "@fluentui/react";
+import { DetailsList, DetailsListLayoutMode, Dropdown, IColumn, Icon, IconButton, IDropdownOption, Modal, SelectionMode, Stack, StackItem, Toggle } from "@fluentui/react";
 import React from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AddVersionModal } from "../../Components/AddVersionModal/addVersionModal";
 import { FileVisualiser } from "../../Components/FileVisualiser/fileVisualiser";
 import { IFileVersion } from "../../Models/FileVersion";
@@ -12,7 +12,6 @@ import { buttonClassName, containerClassName, iconClassName, listContainerClassN
 export const VersioningPage = (): JSX.Element => {
     const { fileId } = useParams<{ fileId: string }>();
     const navigate = useNavigate();
-    const location = useLocation();
 
     const [file, setFile] = React.useState<IFileWithVersions>();
     const [fileVersions, setFileVersions] = React.useState<IFileVersion[]>([]);
@@ -73,7 +72,6 @@ export const VersioningPage = (): JSX.Element => {
                     ariaLabel="Download"
                     onClick={() => handleDownload(item)}
                 />
-                // <a href={item.tokenSAS} download={getDownloadName(item)}>Download</a>
         }
     ];
 
@@ -148,6 +146,7 @@ export const VersioningPage = (): JSX.Element => {
                         styles={{ root: { maxHeight: "300px" } }}
                         ariaLabelForSelectionColumn="Toggle selection"
                         ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                        selectionMode={SelectionMode.none}
                     />
                 </div>
             }

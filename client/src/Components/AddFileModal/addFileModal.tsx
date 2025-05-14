@@ -13,6 +13,7 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
     const [name, setName] = React.useState<string>("");
     const [file, setFile] = React.useState<File | null>(null);
     const [location, setLocation] = React.useState<FileLocation | null>(null);
+    const [secondaryLocation, setSecondaryLocation] = React.useState<FileLocation | null>(null);
     const [redundancy, setRedundancy] = React.useState<Redundancy | null>(null);
     const [versioning, setVersioning] = React.useState<boolean>(false);
     const [errorMessage, setErrorMessage] = React.useState<string>("");
@@ -22,9 +23,15 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
         if (errorMessage !== "") {
             setErrorMessage("");
         }
-    }, [name, file]);
+    }, [name, file, location, secondaryLocation, redundancy, versionFileName]);
 
-    const primaryLocationOptions: IDropdownOption[] = [
+    React.useEffect(() => {
+        if (redundancy !== Redundancy.Custom) {
+            setSecondaryLocation(null);
+        }
+    }, [redundancy]);
+
+    const locationOptions: IDropdownOption[] = [
         { key: FileLocation.WestEurope, text: "West Europe" },
         { key: FileLocation.GermanyWestCentral, text: "Germany West Central" },
         { key: FileLocation.NorthEurope, text: "North Europe" }];
@@ -38,6 +45,12 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
     const onChangedLocation = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void => {
         if (option) {
             setLocation(option.key as FileLocation);
+        }
+    };
+
+    const onChangedSecondaryLocation = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void => {
+        if (option) {
+            setSecondaryLocation(option.key as FileLocation);
         }
     };
 
@@ -76,6 +89,10 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
             newErrorMessage += " Select a redundancy policy.";
         }
 
+        if (redundancy === Redundancy.Custom && IsNullOrUndefined(secondaryLocation)) {
+            newErrorMessage += " Select a secondary location.";
+        }
+
         if (versioning && IsNullOrUndefined(redundancy)) {
             newErrorMessage += " Version name can't be empty.";
         }
@@ -90,6 +107,7 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
             id: "00000000-0000-0000-0000-000000000000",
             name: name + "." + file?.name.split('.').pop(),
             location: location as FileLocation,
+            secondaryLocation: secondaryLocation as FileLocation,
             redundancy: redundancy as Redundancy,
             versioning: versioning,
             versionName: versionFileName
@@ -99,7 +117,7 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
         formData.append('dto', JSON.stringify(newAppFile))
         formData.append('file', file as File);
 
-        AppFilesService.Addfile(formData)
+        AppFilesService.AddFile(formData)
             .then(function (response) {
                 props.onAddedFile(response.data)
             })
@@ -124,7 +142,7 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
                 }
             </Stack>
             <Dropdown
-                options={primaryLocationOptions}
+                options={locationOptions.filter((option) => option.key !== secondaryLocation)}
                 defaultSelectedKey={location}
                 onChange={onChangedLocation}
                 placeholder="Location"
@@ -135,6 +153,14 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
                 onChange={onChangedRedundancy}
                 placeholder="Redundancy"
             />
+            {redundancy === Redundancy.Custom &&
+                <Dropdown
+                    options={locationOptions.filter((option) => option.key !== location)}
+                    defaultSelectedKey={location}
+                    onChange={onChangedSecondaryLocation}
+                    placeholder="Secondary Location"
+                />
+            }
             <Stack>
                 <Label>File</Label>
                 <input

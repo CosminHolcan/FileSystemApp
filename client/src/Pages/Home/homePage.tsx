@@ -1,4 +1,4 @@
-import { DetailsList, DetailsListLayoutMode, IColumn, Icon, Modal, Stack, StackItem } from "@fluentui/react";
+import { DetailsList, DetailsListLayoutMode, IColumn, Icon, Modal, SelectionMode, Stack, StackItem } from "@fluentui/react";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AddFileModal } from "../../Components/AddFileModal/addFileModal";
@@ -6,7 +6,7 @@ import { FileLocation } from "../../Enums/FileLocation";
 import { Redundancy } from "../../Enums/Redundancy";
 import { IAppFile } from "../../Models/AppFile";
 import { AppFilesService } from "../../services";
-import { getDisplayStringLocation } from "../../utils";
+import { getDisplayStringLocation, IsNullOrUndefined } from "../../utils";
 import { buttonClassName, containerClassName, iconClassName, listContainerClassName, titleClassName } from "./homePage.styles";
 
 export const HomePage = (): JSX.Element => {
@@ -52,6 +52,14 @@ export const HomePage = (): JSX.Element => {
         },
         {
             key: 'column3',
+            name: 'Seconday Location',
+            fieldName: 'secondaryLocation',
+            minWidth: 200,
+            isResizable: true,
+            onRender: (item: IAppFile) => !IsNullOrUndefined(item.secondaryLocation) ? getDisplayStringLocation(item.secondaryLocation as FileLocation) : ""
+        },
+        {
+            key: 'column4',
             name: 'Redundancy',
             fieldName: 'redundancy',
             minWidth: 200,
@@ -59,7 +67,7 @@ export const HomePage = (): JSX.Element => {
             onRender: (item: IAppFile) => (Redundancy[item.redundancy as Redundancy])
         },
         {
-            key: 'column4',
+            key: 'column5',
             name: 'Supports Versioning',
             fieldName: 'versioning',
             minWidth: 200,
@@ -70,7 +78,7 @@ export const HomePage = (): JSX.Element => {
                 ) : 'No'
         },
         {
-            key: 'column5',
+            key: 'column6',
             name: 'Creation Date',
             fieldName: 'creationDate',
             minWidth: 200,
@@ -116,10 +124,12 @@ export const HomePage = (): JSX.Element => {
                         items={files}
                         columns={columns}
                         setKey="set"
+                        styles={{ root: { maxHeight: "500px" } }}
                         layoutMode={DetailsListLayoutMode.fixedColumns}
                         selectionPreservedOnEmptyClick={true}
                         ariaLabelForSelectionColumn="Toggle selection"
                         ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                        selectionMode={SelectionMode.none}
                     />
                 </div>
             }

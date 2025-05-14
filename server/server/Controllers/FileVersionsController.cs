@@ -38,34 +38,8 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dtoData.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                AppFile appFile = await _appFilesBLL.GetFileByIdWithStorageAccount(dtoData.OriginalFileId);
-
-                BlobServiceClient blobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
-                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-                BlobClient blobClient = containerClient.GetBlobClient(appFile.Id.ToString() + Path.GetExtension(appFile.Name));
-
-                string versionId = "";
-
-                var blobHttpHeaders = new BlobHttpHeaders
-                {
-                    ContentType = GeneralUtils.GetContentType(appFile.Name),
-                    ContentDisposition = "inline"
-                };
-
-                using (var stream = file.OpenReadStream())
-                {
-                    var result = await blobClient.UploadAsync(
-                        stream,
-                        new BlobUploadOptions
-                        {
-                            HttpHeaders = blobHttpHeaders,
-                        });
-                    versionId = result.Value.VersionId;
-                }
-
-                dtoData.AzureId = versionId;
-                FileVersionDTO fileVersionDTO = await _fileVersionsBLL.AddVersion(dtoData);
-                return Ok(fileVersionDTO);
+                var result = await _fileVersionsBLL.AddVersion(dtoData, file);
+                return Ok(result);
             }
             catch (Exception ex)
             {

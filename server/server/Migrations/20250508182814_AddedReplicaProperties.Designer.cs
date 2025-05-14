@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using server.DAL;
 
@@ -11,9 +12,11 @@ using server.DAL;
 namespace server.Migrations
 {
     [DbContext(typeof(FileSystemAppDbContext))]
-    partial class MovieReviewDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250508182814_AddedReplicaProperties")]
+    partial class AddedReplicaProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,11 +37,8 @@ namespace server.Migrations
                     b.Property<bool?>("IsReplica")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("LastInteraction")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("LastUpdate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("LastInteraction")
+                        .HasColumnType("date");
 
                     b.Property<string>("Name")
                         .IsRequired()

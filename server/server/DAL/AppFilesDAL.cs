@@ -27,6 +27,29 @@ namespace server.DAL
             return appFile;
         }
 
+        public async Task UpdateTimeInteractionsForFile(Guid fileId, DateTime time, bool changeLastUpdate)
+        {
+            AppFile appFile = await this.GetFileById(fileId);
+            appFile.LastInteraction = time;
+            if (changeLastUpdate)
+            {
+                appFile.LastUpdate = time;
+            }
+
+            await this.UpdateFile(appFile);
+        }
+
+        public async Task UpdateFile(AppFile updatedFile)
+        {
+            _dbContext.AppFiles.Update(updatedFile);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<AppFile> GetFileById(Guid fileId)
+        {
+            return await this._dbContext.AppFiles.FirstOrDefaultAsync(f => f.Id == fileId);
+        }
+
         public async Task<List<AppFile>> GetFilesByUser(Guid userId)
         {
             return await this._dbContext.AppFiles

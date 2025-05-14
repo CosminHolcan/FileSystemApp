@@ -24,7 +24,7 @@ export namespace UsersService {
 export namespace AppFilesService {
     const APP_FILES_URL = `${BASE_URL}/AppFiles`;
 
-    export const Addfile = (dto: FormData) => {
+    export const AddFile = (dto: FormData) => {
         return axios.post(`${APP_FILES_URL}/add`, dto, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -37,8 +37,20 @@ export namespace AppFilesService {
     };
 
     export const ReadFileWithVersionsById = (fileId: string, dto: IBaseDTO) => {
+        return axios.post(`${APP_FILES_URL}/getWithVersions/${fileId}`, dto);
+    };
+
+    export const ReadFileById = (fileId: string, dto: IBaseDTO) => {
         return axios.post(`${APP_FILES_URL}/get/${fileId}`, dto);
-    }
+    };
+
+    export const UploadNewContent = (fileId: string, dto: FormData) => {
+        return axios.post(`${APP_FILES_URL}/uploadNewContent/${fileId}`, dto, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    };
 };
 
 export namespace FileVersionsService {

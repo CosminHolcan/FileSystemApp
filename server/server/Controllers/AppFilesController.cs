@@ -40,46 +40,7 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dtoData.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                AppFileDTO appFileDTO = await _appFilesBLL.AddFile(dtoData, userId);
-
-                StorageAccount storageAccount = await this._storageAccountsBLL.GetStorageAccountById(appFileDTO.StorageAccountId);
-
-                BlobServiceClient blobServiceClient = new BlobServiceClient(storageAccount.ConnectionString);
-                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-                BlobClient blobClient = containerClient.GetBlobClient(appFileDTO.Id.ToString() + Path.GetExtension(appFileDTO.Name));
-
-                string versionId = "";
-
-                var blobHttpHeaders = new BlobHttpHeaders
-                {
-                    ContentType = GeneralUtils.GetContentType(appFileDTO.Name),
-                    ContentDisposition = "inline"
-                };
-
-                using (var stream = file.OpenReadStream())
-                {
-                    var result = await blobClient.UploadAsync(
-                        stream,                        
-                        new BlobUploadOptions
-                        {
-                            HttpHeaders = blobHttpHeaders,
-                        });
-                    if ((bool)appFileDTO.Versioning)
-                    {
-                        versionId = result.Value.VersionId;
-                    }
-                }
-
-                if (versionId != "")
-                {
-                    AddFileVersionDTO versionDTO = new AddFileVersionDTO()
-                    {
-                        Name = dtoData.VersionName,
-                        AzureId = versionId,
-                        OriginalFileId = appFileDTO.Id
-                    };
-                    await this._fileVersionsBLL.AddVersion(versionDTO);
-                }
+                AppFileDTO appFileDTO = await _appFilesBLL.AddFile(dtoData, userId, file);
 
                 return Ok(appFileDTO);
             }
@@ -106,7 +67,7 @@ namespace server.Controllers
             }
         }
 
-        [HttpPost("get/{fileId}")]
+        [HttpPost("getWithVersions/{fileId}")]
         public async Task<ActionResult<FileWithVersionsDTO>> ReadFileWithVersionsById(Guid fileId, [FromBody] BaseDTO dto)
         {
             try
@@ -116,6 +77,47 @@ namespace server.Controllers
 
                 FileWithVersionsDTO fileWithVersionsDTO = await this._appFilesBLL.GetFileByIdWithVersions(fileId);
                 return Ok(fileWithVersionsDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("get/{fileId}")]
+        public async Task<ActionResult<AppFileDTO>> ReadFileById(Guid fileId, [FromBody] BaseDTO dto)
+        {
+            try
+            {
+                JwtSecurityToken token = JWTService.Verify(dto.Jwt);
+                Guid userId = new Guid(token.Issuer);
+
+                AppFileDTO appFileDTO = await this._appFilesBLL.GetFileById(fileId);
+                return Ok(appFileDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("uploadNewContent/{fileId}")]
+        public async Task<ActionResult<AppFileDTO>> UploadNewContent(Guid fileId, [FromForm] string dto, [FromForm] IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest("No file provided.");
+                }
+
+                var dtoData = JsonSerializer.Deserialize<BaseDTO>(dto, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                JwtSecurityToken token = JWTService.Verify(dtoData.Jwt);
+                Guid userId = new Guid(token.Issuer);
+
+                AppFileDTO appFileDTO = await this._appFilesBLL.UploadNewContent(fileId, file);
+                return Ok(appFileDTO);
             }
             catch (Exception ex)
             {

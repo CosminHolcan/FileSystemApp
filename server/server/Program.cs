@@ -38,10 +38,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     //var db = scope.ServiceProvider.GetRequiredService<FileSystemAppDbContext>();
-    //db.Database.Migrate();  // Applies any pending migrations
+    //db.Database.Migrate();
 }
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

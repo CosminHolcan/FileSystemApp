@@ -30,7 +30,8 @@ namespace server.DAL
 
         public async Task<StorageAccount> GetStorageAccountByFeatures(Location location, Redundancy redundancy, bool versioning)
         {
-            return await _dbContext.StorageAccounts.FirstOrDefaultAsync(s => s.Location == location && s.Redundancy == redundancy && s.Versioning == versioning);
+            Redundancy actualRedundancy = redundancy == Redundancy.Custom ? Redundancy.Locally : redundancy;
+            return await _dbContext.StorageAccounts.FirstOrDefaultAsync(s => s.Location == location && s.Redundancy == actualRedundancy && s.Versioning == versioning);
         }
     }
 }

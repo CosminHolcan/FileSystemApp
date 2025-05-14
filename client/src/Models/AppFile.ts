@@ -6,7 +6,9 @@ export interface IAppFile {
     name?: string;
     storageAccountId?: string;
     location?: FileLocation;
+    secondaryLocation?: FileLocation;
     redundancy?: Redundancy;
     versioning?: boolean;
     versionName?: string;
+    tokenSAS?: string;
 };

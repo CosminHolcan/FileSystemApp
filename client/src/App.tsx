@@ -8,6 +8,7 @@ import { LoginPage } from './Pages/Login/loginPage';
 import { RegisterPage } from './Pages/Register/registerPage';
 import { VersioningPage } from './Pages/Versioning/versioningPage';
 import { UsersService } from './services';
+import { FilePage } from './Pages/FilePage/filePage';
 
 export const App = (): JSX.Element => {
   const isUserAuthenticated = (): boolean => {
@@ -42,6 +43,7 @@ export const App = (): JSX.Element => {
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/home' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<HomePage />} />} />
         <Route path='/versioning/:fileId' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<VersioningPage />} />} />
+        <Route path='/file/:fileId' element={<PrivateRoute {...defaultProtectedRouteProps} outlet={<FilePage />} />} />X
       </Routes>
     </Router>
   );

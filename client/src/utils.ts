@@ -36,12 +36,30 @@ export const IsNullOrUndefined = (object: any): boolean => {
 
 export const downloadBlobWithName = async (tokenSAS: string, desiredFileName: string) => {
     try {
-        const link = document.createElement('a');
-        link.href = tokenSAS;
+        // const link = document.createElement('a');
+        // link.href = tokenSAS;
+        // link.download = desiredFileName;
+        // document.body.appendChild(link);
+        // link.click();
+        // document.body.removeChild(link);
+
+        const response: Response = await fetch(tokenSAS);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch file: ${response.statusText}`);
+        }
+
+        const blob: Blob = await response.blob();
+
+        const link: HTMLAnchorElement = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
         link.download = desiredFileName;
+
         document.body.appendChild(link);
         link.click();
+
         document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
     }
     catch (error) {
         console.error('Download failed', error);

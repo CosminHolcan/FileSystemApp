@@ -12,6 +12,8 @@ namespace server.DTO
 
         public Location? Location { get; set; }
 
+        public Location? SecondaryLocation { get; set; }
+
         public Redundancy? Redundancy { get; set; }
 
         public bool? Versioning { get; set; }
@@ -19,5 +21,11 @@ namespace server.DTO
         public string? CreationDate { get; set; }
 
         public string? VersionName { get; set; }
+
+        public Guid? ReplicaId { get; set; }
+
+        public bool? IsReplica { get; set; }
+
+        public string? TokenSAS { get; set; }
     }
 }
