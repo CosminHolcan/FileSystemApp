@@ -102,7 +102,7 @@ namespace server.BLL
                 Name = mainFile.Name,
                 StorageAccountId = mainFile.StorageAccountId,
                 Location = mainStorage.Location,
-                Redundancy = mainStorage.Redundancy,
+                Redundancy = mainFile.ReplicaId != null ? Redundancy.Custom : mainStorage.Redundancy,
                 Versioning = mainStorage.Versioning,
                 CreationDate = mainFile.CreationDate.ToShortDateString()
             };
@@ -180,7 +180,7 @@ namespace server.BLL
                 CreationDate = f.CreationDate.ToShortDateString(),
                 Location = f.StorageAccount.Location,
                 SecondaryLocation = f.ReplicaId != null ? files.Find(r => r.Id == f.ReplicaId).StorageAccount.Location : null,
-                Redundancy = f.StorageAccount.Redundancy,
+                Redundancy = f.ReplicaId != null ? Redundancy.Custom : f.StorageAccount.Redundancy,
                 Versioning = f.StorageAccount.Versioning
             }).ToList();
         }

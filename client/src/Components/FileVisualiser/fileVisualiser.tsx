@@ -2,27 +2,7 @@ import React from "react";
 import { IFileVisualiserProps } from "./fileVisualiser.types";
 
 export const FileVisualiser = (props: IFileVisualiserProps): JSX.Element => {
-    // const [fileContent, setFileContent] = React.useState('');
     const extension: string = props.fileName.split('.').pop()?.toLowerCase() as string;
-
-    // React.useEffect(() => {
-    //     if (extension === 'txt') {
-    //         fetch(props.tokenSAS, {
-    //             method: 'GET',
-    //             headers: {
-    //                 Accept: 'text/plain'
-    //             }
-    //         })
-    //             .then(res => {
-    //                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    //                 return res.text();
-    //             })
-    //             .then(text => setFileContent(text))
-    //             .catch(err => {
-    //                 console.error('Failed to fetch text file:', err);
-    //             });
-    //     }
-    // }, [props.tokenSAS, extension]);
 
     if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'webp'].includes(extension)) {
         return (

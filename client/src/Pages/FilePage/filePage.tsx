@@ -1,12 +1,12 @@
 import { Icon, Modal, Stack, StackItem } from "@fluentui/react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { FileVisualiser } from "../../Components/FileVisualiser/fileVisualiser";
+import { UploadNewContentModal } from "../../Components/UploadNewContentModal/uploadNewContentModal";
 import { IAppFile } from "../../Models/AppFile";
 import { AppFilesService } from "../../services";
 import { downloadBlobWithName } from "../../utils";
 import { buttonClassName, containerClassName, iconClassName, titleClassName } from "./filePage.styles";
-import { FileVisualiser } from "../../Components/FileVisualiser/fileVisualiser";
-import { UploadNewContentModal } from "../../Components/UploadNewContentModal/uploadNewContentModal";
 
 export const FilePage = (): JSX.Element => {
     const { fileId } = useParams<{ fileId: string }>();
@@ -30,8 +30,9 @@ export const FilePage = (): JSX.Element => {
         downloadBlobWithName(file?.tokenSAS as string, file?.name as string);
     };
 
-    const onUploadContent = (file: any): void => {
-        setFile({...file, tokenSAS: file.tokenSAS})
+    const onUploadContent = (newFile: any): void => {
+        setFile({ ...file, tokenSAS: newFile.tokenSAS });
+        setIsModalOpen(false);
     };
 
     return (
@@ -76,10 +77,12 @@ export const FilePage = (): JSX.Element => {
                     />
                     Home
                 </button>
-                {file &&
-                    <FileVisualiser tokenSAS={file.tokenSAS as string} fileName={file?.name as string} />
-                }
             </Stack>
+            {file &&
+                <div style={{ marginTop: "10px" }}>
+                    <FileVisualiser tokenSAS={file.tokenSAS as string} fileName={file?.name as string} />
+                </div>
+            }
         </Stack>
     );
 };

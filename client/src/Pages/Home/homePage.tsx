@@ -40,7 +40,9 @@ export const HomePage = (): JSX.Element => {
             name: 'File name',
             fieldName: 'name',
             minWidth: 200,
-            isResizable: true
+            isResizable: true,
+            onRender: item =>
+                <Link to={`/file/${item.id}`}>{item.name}</Link>
         },
         {
             key: 'column2',

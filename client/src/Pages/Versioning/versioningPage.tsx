@@ -180,7 +180,9 @@ export const VersioningPage = (): JSX.Element => {
                                     styles={{ dropdown: { width: 300 } }}
                                 />
                                 {firstSelectedFile &&
-                                    <FileVisualiser tokenSAS={findFileVersionById(firstSelectedFile).tokenSAS as string} fileName={file?.name as string} />
+                                    <div style={{ marginTop: "10px" }}>
+                                        <FileVisualiser tokenSAS={findFileVersionById(firstSelectedFile).tokenSAS as string} fileName={file?.name as string} />
+                                    </div>
                                 }
                             </StackItem>
                             <StackItem grow>
@@ -193,7 +195,9 @@ export const VersioningPage = (): JSX.Element => {
                                     styles={{ dropdown: { width: 300 } }}
                                 />
                                 {secondSelectedFile &&
-                                    <FileVisualiser tokenSAS={findFileVersionById(secondSelectedFile).tokenSAS as string} fileName={file?.name as string} />
+                                    <div style={{ marginTop: "10px" }}>
+                                        <FileVisualiser tokenSAS={findFileVersionById(secondSelectedFile).tokenSAS as string} fileName={file?.name as string} />
+                                    </div>
                                 }
                             </StackItem>
                         </Stack>
@@ -207,7 +211,9 @@ export const VersioningPage = (): JSX.Element => {
                                 styles={{ dropdown: { width: 300 } }}
                             />
                             {firstSelectedFile &&
-                                <FileVisualiser tokenSAS={findFileVersionById(firstSelectedFile).tokenSAS as string} fileName={file?.name as string} />
+                                <div style={{ marginTop: "10px" }}>
+                                    <FileVisualiser tokenSAS={findFileVersionById(firstSelectedFile).tokenSAS as string} fileName={file?.name as string} />
+                                </div>
                             }
                         </Stack>
                     }
