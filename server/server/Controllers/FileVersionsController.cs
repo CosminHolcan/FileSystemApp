@@ -55,7 +55,9 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                List<FileVersionDTO> fileVersionsDTO = await this._fileVersionsBLL.GetFileVersionsByOriginalFileId(originalFileId);
+                AppFile availableFile = await this._appFilesBLL.GetAvailableFileReplica(originalFileId, true);
+                List<FileVersionDTO> fileVersionsDTO = await this._fileVersionsBLL.GetFileVersionsByOriginalFileId(availableFile);
+                
                 return Ok(fileVersionsDTO);
             }
             catch (Exception ex)

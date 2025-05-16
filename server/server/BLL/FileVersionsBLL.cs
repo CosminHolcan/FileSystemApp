@@ -102,10 +102,9 @@ namespace server.BLL
             return toReturn;
         }
 
-        public async Task<List<FileVersionDTO>> GetFileVersionsByOriginalFileId(Guid originalFileId)
+        public async Task<List<FileVersionDTO>> GetFileVersionsByOriginalFileId(AppFile appFile)
         {
-            List<FileVersion> fileVersions = await this._fileVersionsDAL.GetFileVersionsByOriginalFileId(originalFileId);
-            AppFile appFile = await this._appFilesDAL.GetFileByIdWithStorageAccount(originalFileId);
+            List<FileVersion> fileVersions = await this._fileVersionsDAL.GetFileVersionsByOriginalFileId(appFile.Id);
             string azureFileName = appFile.Id.ToString() + Path.GetExtension(appFile.Name);
 
             return fileVersions.Select(f => new FileVersionDTO()

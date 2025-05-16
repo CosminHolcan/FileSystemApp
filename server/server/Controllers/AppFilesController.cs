@@ -92,7 +92,9 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                AppFileDTO appFileDTO = await this._appFilesBLL.GetFileById(fileId);
+                AppFile availableFile = await this._appFilesBLL.GetAvailableFileReplica(fileId, false);
+                AppFileDTO appFileDTO = await this._appFilesBLL.GetFileById(availableFile);
+
                 return Ok(appFileDTO);
             }
             catch (Exception ex)

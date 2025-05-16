@@ -1,5 +1,6 @@
-﻿using Azure.Storage.Blobs.Models;
+﻿using System.IO.Compression;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using server.DAL;
 using server.DAL.Entities;
 using server.DTO;
@@ -213,12 +214,11 @@ namespace server.BLL
             };
         }
 
-        public async Task<AppFileDTO> GetFileById(Guid fileId)
+        public async Task<AppFileDTO> GetFileById(AppFile appFile)
         {
-            AppFile appFile = await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
             string azureFileName = appFile.Id.ToString() + Path.GetExtension(appFile.Name);
 
-            await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, DateTime.Now, false);
+            await this._appFilesDAL.UpdateTimeInteractionsForFile(appFile.Id, DateTime.Now, false);
 
             return new AppFileDTO()
             {
@@ -227,8 +227,53 @@ namespace server.BLL
                 Versioning = appFile.StorageAccount.Versioning,
                 TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName),
                 ReplicaId = appFile.Id,
-                IsReplica  = appFile.IsReplica
+                IsReplica = appFile.IsReplica
             };
+        }
+
+        public async Task<AppFile> GetAvailableFileReplica(Guid fileId, bool includeVersions)
+        {
+            AppFile originalRequestedFile = includeVersions
+                ? await this._appFilesDAL.GetFullFileById(fileId)
+                : await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
+
+            if (originalRequestedFile.ReplicaId == null)
+            {
+                return originalRequestedFile;
+            }
+
+            AppFile replicaFile = includeVersions
+                ? await this._appFilesDAL.GetFullFileById((Guid)originalRequestedFile.ReplicaId)
+                : await this._appFilesDAL.GetFileByIdWithStorageAccount((Guid)originalRequestedFile.ReplicaId);
+
+            AppFile firstCheckedFile = originalRequestedFile.LastUpdate >= replicaFile.LastUpdate ? originalRequestedFile : replicaFile;
+            AppFile secondCheckedFile = firstCheckedFile.Id == originalRequestedFile.Id ? replicaFile : originalRequestedFile;
+
+            try
+            {
+                BlobServiceClient blobServiceClient = new BlobServiceClient(firstCheckedFile.StorageAccount.ConnectionString);
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
+                BlobClient blobClient = containerClient.GetBlobClient(firstCheckedFile.Id.ToString() + Path.GetExtension(firstCheckedFile.Name));
+
+                await blobClient.GetPropertiesAsync();
+                return firstCheckedFile;
+            }
+            catch
+            {
+                try
+                {
+                    BlobServiceClient blobServiceClient = new BlobServiceClient(secondCheckedFile.StorageAccount.ConnectionString);
+                    BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
+                    BlobClient blobClient = containerClient.GetBlobClient(secondCheckedFile.Id.ToString() + Path.GetExtension(secondCheckedFile.Name));
+
+                    await blobClient.GetPropertiesAsync();
+                    return secondCheckedFile;
+                }
+                catch
+                {
+                    throw new Exception("File not available");
+                }
+            }
         }
 
         private async Task<string> UploadFileToBlob(StorageAccount storageAccount, Guid fileId, IFormFile file, string originalFileName, bool? versioning)
