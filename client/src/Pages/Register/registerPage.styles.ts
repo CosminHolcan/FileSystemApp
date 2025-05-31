@@ -1,7 +1,7 @@
 import React from "react";
 
 export const RegisterContainerStyle: React.CSSProperties = {
-    backgroundColor: "#0EBFE9",
+    backgroundColor: "#0078d4",
     height: "100vh"
 }
 
@@ -47,7 +47,7 @@ export const ButtonLoginStyle: React.CSSProperties = {
     borderWidth: 0,
     width: "10vw",
     height: "6vh",
-    backgroundColor: "#0EBFE9",
+    backgroundColor: "#0078d4",
     fontFamily: "Grotesco",
     fontSize: 15,
     color: "white"

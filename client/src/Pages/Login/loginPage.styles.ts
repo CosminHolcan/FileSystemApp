@@ -1,8 +1,8 @@
 import React from "react";
 
 export const LoginContainerStyle: React.CSSProperties = {
-    backgroundColor: "#0EBFE9",
-    height: "100vh"
+    backgroundColor: "#0078d4",
+    height: "100vh",
 }
 
 export const LoginFormContainerStyle: React.CSSProperties = {
@@ -39,7 +39,7 @@ export const ButtonRegisterStyle: React.CSSProperties = {
     borderWidth: 0,
     width: "10vw",
     height: "4vh",
-    backgroundColor: "#0EBFE9",
+    backgroundColor: "#0078d4",
     fontFamily: "Grotesco",
     fontSize: 15,
     color: "white"
