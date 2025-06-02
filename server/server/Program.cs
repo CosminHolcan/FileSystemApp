@@ -20,7 +20,11 @@ builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
         .WithOrigins("http://localhost:3000");
 }));
 
-var connectionString = "Server=tcp:filesystemappdbserver.database.windows.net,1433;Initial Catalog=filesystemappdb;Persist Security Info=False;User ID=dbadmin;Password=Admin_db17;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+
+var dbUser = builder.Configuration["dbUser"];
+var dbPassword = builder.Configuration["dbPassword"];
+
+var connectionString = $"Server=tcp:filesystemappdbserver.database.windows.net,1433;Initial Catalog=filesystemappdb;Persist Security Info=False;User ID={dbUser};Password={dbPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 builder.Services.AddDbContext<FileSystemAppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<UsersDAL>();
