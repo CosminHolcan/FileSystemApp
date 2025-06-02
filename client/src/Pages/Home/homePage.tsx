@@ -13,7 +13,6 @@ export const HomePage = (): JSX.Element => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [files, setFiles] = React.useState<IAppFile[]>([]);
     const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
 
     React.useEffect(() => {
@@ -22,6 +21,8 @@ export const HomePage = (): JSX.Element => {
                 setFiles(response.data);
             })
     }, []);
+
+    const [files, setFiles] = React.useState<IAppFile[]>([]);
 
     const handleAddFile = (newFile: IAppFile): void => {
         setFiles([...files, newFile]);
@@ -129,8 +130,6 @@ export const HomePage = (): JSX.Element => {
                         styles={{ root: { maxHeight: "500px" } }}
                         layoutMode={DetailsListLayoutMode.fixedColumns}
                         selectionPreservedOnEmptyClick={true}
-                        ariaLabelForSelectionColumn="Toggle selection"
-                        ariaLabelForSelectAllCheckbox="Toggle selection for all items"
                         selectionMode={SelectionMode.none}
                     />
                 </div>
