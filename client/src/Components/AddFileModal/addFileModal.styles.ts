@@ -5,8 +5,8 @@ export const modalContainerClassName: string = mergeStyles({
     boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.1)',
     borderRadius: '8px',
     padding: '20px',
-    width: '500px',
-    height: '350px',
+    width: '850px',
+    height: '600px',
     maxHeight: '80vh',
     overflowY: 'auto'
 });
@@ -19,7 +19,7 @@ export const nameStyles: IStyleFunctionOrObject<ITextFieldStyleProps, ITextField
         borderRadius: '4px',
         fontSize: '16px',
         backgroundColor: '#ffffff',
-        width: '400px'
+        width: '380px'
     }
 };
 
@@ -42,4 +42,10 @@ export const errorMessageClassName: string = mergeStyles({
     fontSize: 17,
     color: "red",
     marginBottom: "15px"
+});
+
+export const extenssionClassName: string = mergeStyles({
+    marginLeft: "10px",
+    marginTop: "35px",
+    fontSize: "16px"
 });

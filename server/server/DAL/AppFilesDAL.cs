@@ -71,5 +71,11 @@ namespace server.DAL
                 .Include(f => f.StorageAccount)
                 .FirstOrDefaultAsync(f => f.Id == fileId);
         }
+
+        public async Task DeleteFile(AppFile appFile)
+        {
+            _dbContext.AppFiles.Remove(appFile);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

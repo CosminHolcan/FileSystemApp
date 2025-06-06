@@ -2,6 +2,7 @@ import axios from "axios";
 import { IBaseDTO } from "./DTO/BaseDTO";
 import { ILoginUserDTO } from "./DTO/LoginUserDTO";
 import { IRegisterUserDTO } from "./DTO/RegisterUserDTO";
+import { IUpdateFileNameDTO } from "./DTO/UpdateFileNameDTO";
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -42,6 +43,14 @@ export namespace AppFilesService {
 
     export const ReadFileById = (fileId: string, dto: IBaseDTO) => {
         return axios.post(`${APP_FILES_URL}/get/${fileId}`, dto);
+    };
+
+    export const DeleteFile = (fileId: string, dto: IBaseDTO) => {
+        return axios.post(`${APP_FILES_URL}/delete/${fileId}`, dto);
+    };
+
+    export const UpdateFileName = (fileId: string, dto: IUpdateFileNameDTO) => {
+        return axios.post(`${APP_FILES_URL}/updateFileName/${fileId}`, dto);
     };
 
     export const UploadNewContent = (fileId: string, dto: FormData) => {

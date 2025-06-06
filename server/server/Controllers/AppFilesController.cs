@@ -103,6 +103,24 @@ namespace server.Controllers
             }
         }
 
+        [HttpPost("updateFileName/{fileId}")]
+        public async Task<ActionResult<AppFileDTO>> UpdateFileName(Guid fileId, [FromBody] UpdateFileNameDTO dto)
+        {
+            try
+            {
+                JwtSecurityToken token = JWTService.Verify(dto.Jwt);
+                Guid userId = new Guid(token.Issuer);
+
+                await this._appFilesBLL.UpdateFileName(fileId, dto.NewFileName);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("uploadNewContent/{fileId}")]
         public async Task<ActionResult<AppFileDTO>> UploadNewContent(Guid fileId, [FromForm] string dto, [FromForm] IFormFile file)
         {
@@ -120,6 +138,24 @@ namespace server.Controllers
 
                 AppFileDTO appFileDTO = await this._appFilesBLL.UploadNewContent(fileId, file);
                 return Ok(appFileDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("delete/{fileId}")]
+        public async Task<IActionResult> DeleteFile(Guid fileId, [FromBody] BaseDTO dto)
+        {
+            try
+            {
+                JwtSecurityToken token = JWTService.Verify(dto.Jwt);
+                Guid userId = new Guid(token.Issuer);
+
+                await this._appFilesBLL.DeleteFile(fileId);
+
+                return NoContent();
             }
             catch (Exception ex)
             {

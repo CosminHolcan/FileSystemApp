@@ -104,6 +104,7 @@ namespace server.BLL
                 StorageAccountId = mainFile.StorageAccountId,
                 Location = mainStorage.Location,
                 Redundancy = mainFile.ReplicaId != null ? Redundancy.Custom : mainStorage.Redundancy,
+                SecondaryLocation = mainFile.ReplicaId != null ? dto.SecondaryLocation : null,
                 Versioning = mainStorage.Versioning,
                 CreationDate = mainFile.CreationDate.ToShortDateString()
             };
@@ -116,7 +117,7 @@ namespace server.BLL
 
             BlobServiceClient blobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-            BlobClient blobClient = containerClient.GetBlobClient(appFile.Id.ToString() + Path.GetExtension(appFile.Name));
+            BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
 
             BlobHttpHeaders blobHttpHeaders = new BlobHttpHeaders
             {
@@ -154,7 +155,7 @@ namespace server.BLL
 
                 BlobServiceClient replicaBlobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
                 BlobContainerClient replicaContainerClient = replicaBlobServiceClient.GetBlobContainerClient("container");
-                BlobClient replicaBlobClient = replicaContainerClient.GetBlobClient(appFile.Id.ToString() + Path.GetExtension(appFile.Name));
+                BlobClient replicaBlobClient = replicaContainerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
 
                 using (var stream = file.OpenReadStream())
                 {
@@ -253,7 +254,7 @@ namespace server.BLL
             {
                 BlobServiceClient blobServiceClient = new BlobServiceClient(firstCheckedFile.StorageAccount.ConnectionString);
                 BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-                BlobClient blobClient = containerClient.GetBlobClient(firstCheckedFile.Id.ToString() + Path.GetExtension(firstCheckedFile.Name));
+                BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(firstCheckedFile));
 
                 await blobClient.GetPropertiesAsync();
                 return firstCheckedFile;
@@ -264,7 +265,7 @@ namespace server.BLL
                 {
                     BlobServiceClient blobServiceClient = new BlobServiceClient(secondCheckedFile.StorageAccount.ConnectionString);
                     BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-                    BlobClient blobClient = containerClient.GetBlobClient(secondCheckedFile.Id.ToString() + Path.GetExtension(secondCheckedFile.Name));
+                    BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(secondCheckedFile));
 
                     await blobClient.GetPropertiesAsync();
                     return secondCheckedFile;
@@ -273,6 +274,42 @@ namespace server.BLL
                 {
                     throw new Exception("File not available");
                 }
+            }
+        }
+
+        public async Task DeleteFile(Guid fileId)
+        {
+            AppFile file, replica = null;
+            file = await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
+            if (file == null)
+                return;
+            
+            if (file.ReplicaId != null)
+            {
+                replica = await this._appFilesDAL.GetFileByIdWithStorageAccount((Guid)file.ReplicaId);
+            }
+
+            await this.DeleteFileFromAzure(file);
+            await this._appFilesDAL.DeleteFile(file);
+
+            if (replica != null)
+            {
+                await this.DeleteFileFromAzure(replica);
+                await this._appFilesDAL.DeleteFile(replica);
+            }
+        }
+
+        public async Task UpdateFileName(Guid fileId, string newFileName)
+        {
+            AppFile appFile = await this._appFilesDAL.GetFileById(fileId);
+            appFile.Name = newFileName;
+            await this._appFilesDAL.UpdateFile(appFile);
+
+            if (appFile.ReplicaId != null)
+            {
+                AppFile replica = await this._appFilesDAL.GetFileById((Guid)appFile.ReplicaId);
+                replica.Name = newFileName;
+                await this._appFilesDAL.UpdateFile(replica);
             }
         }
 
@@ -297,6 +334,15 @@ namespace server.BLL
 
                 return versioning == true ? result.Value.VersionId : null;
             }
+        }
+
+        private async Task DeleteFileFromAzure(AppFile appFile)
+        {
+            BlobServiceClient serviceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
+            BlobContainerClient containerClient = serviceClient.GetBlobContainerClient("container");
+            BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
+
+            await blobClient.DeleteAsync();
         }
     }
 }

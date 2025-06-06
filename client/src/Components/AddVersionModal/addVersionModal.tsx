@@ -76,7 +76,7 @@ export const AddVersionModal = (props: AddVersionModalProps): JSX.Element => {
                     value={name}
                     onChange={(event, newValue) => setName(newValue ?? "")}
                     styles={nameStyles}
-                    placeholder="Version name"
+                    label="Version Name"
                 />
             </Stack>
             <Stack>

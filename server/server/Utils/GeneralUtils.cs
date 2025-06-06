@@ -1,4 +1,6 @@
-﻿namespace server.Utils
+﻿using server.DAL.Entities;
+
+namespace server.Utils
 {
     public static class GeneralUtils
     {
@@ -18,6 +20,11 @@
                 ".gif" => "image/gif",
                 _ => "application/octet-stream",
             };
+        }
+
+        public static string GetAzureFileName(AppFile appFile)
+        {
+            return appFile.Id.ToString() + Path.GetExtension(appFile.Name);
         }
     }
 }

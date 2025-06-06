@@ -25,7 +25,7 @@ namespace server.BLL
 
             BlobServiceClient blobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-            BlobClient blobClient = containerClient.GetBlobClient(appFile.Id.ToString() + Path.GetExtension(appFile.Name));
+            BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
 
             BlobHttpHeaders blobHttpHeaders = new BlobHttpHeaders
             {
@@ -75,7 +75,7 @@ namespace server.BLL
 
                 BlobServiceClient replicaBlobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
                 BlobContainerClient replicaContainerClient = replicaBlobServiceClient.GetBlobContainerClient("container");
-                BlobClient replicaBlobClient = replicaContainerClient.GetBlobClient(appFile.Id.ToString() + Path.GetExtension(appFile.Name));
+                BlobClient replicaBlobClient = replicaContainerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
 
                 string replicaVerionId;
                 using (var stream = file.OpenReadStream())
