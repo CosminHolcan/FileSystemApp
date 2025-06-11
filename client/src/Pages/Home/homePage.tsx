@@ -2,6 +2,7 @@ import { DetailsList, DetailsListLayoutMode, IColumn, Icon, Modal, SelectionMode
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AddFileModal } from "../../Components/AddFileModal/addFileModal";
+import { useNotification } from "../../Components/Notification/notification";
 import { FileLocation } from "../../Enums/FileLocation";
 import { Redundancy } from "../../Enums/Redundancy";
 import { IAppFile } from "../../Models/AppFile";
@@ -11,6 +12,7 @@ import { buttonClassName, containerClassName, iconClassName, listContainerClassN
 
 export const HomePage = (): JSX.Element => {
     const navigate = useNavigate();
+    const notify = useNotification();
     const location = useLocation();
 
     const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
@@ -26,6 +28,11 @@ export const HomePage = (): JSX.Element => {
 
     const handleAddFile = (newFile: IAppFile): void => {
         setFiles([...files, newFile]);
+        setIsModalOpen(false);
+    };
+
+    const handleErrorAddFile = (error: any): void => {
+        notify(error.response.data);
         setIsModalOpen(false);
     };
 
@@ -95,6 +102,7 @@ export const HomePage = (): JSX.Element => {
             <Modal isOpen={isModalOpen} onDismiss={() => setIsModalOpen(false)}>
                 <AddFileModal
                     onAddedFile={handleAddFile}
+                    onError={handleErrorAddFile}
                 />
             </Modal>
             <Stack className={titleClassName} horizontal horizontalAlign="space-between">

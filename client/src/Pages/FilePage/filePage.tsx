@@ -59,6 +59,11 @@ export const FilePage = (): JSX.Element => {
         setIsModalOpen(false);
     };
 
+    const onErrorUploadContent = (error: any): void => {
+        notify(error.response.data);
+        setIsModalOpen(false);
+    };
+
     const handleSaveNewName = (): void => {
         if (fileId === undefined) {
             return;
@@ -69,8 +74,11 @@ export const FilePage = (): JSX.Element => {
             return;
         }
 
-        AppFilesService.UpdateFileName(fileId, { jwt: localStorage.getItem("jwt") as string, newFileName: `${name}.${extension}` })
+        const newFileName: string = `${name}.${extension}`;
+        
+        AppFilesService.UpdateFileName(fileId, { jwt: localStorage.getItem("jwt") as string, newFileName: newFileName })
             .then(function (response) {
+                setFile({...file, name: newFileName})
                 notify("Name was succesfully changed.");
             })
             .catch(function (error) {
@@ -84,6 +92,7 @@ export const FilePage = (): JSX.Element => {
                 <Modal isOpen={isModalOpen} onDismiss={() => setIsModalOpen(false)}>
                     <UploadNewContentModal
                         onAddedContent={onUploadContent}
+                        onErrorAddedContent={onErrorUploadContent}
                         fileId={fileId}
                         fileName={file.name as string}
                         versioning={file.versioning as boolean}

@@ -8,10 +8,12 @@ import { IFileWithVersions } from "../../Models/FileWithVersions";
 import { AppFilesService } from "../../services";
 import { downloadBlobWithName } from "../../utils";
 import { buttonClassName, containerClassName, iconClassName, listContainerClassName, titleClassName } from "./versioningPage.styles";
+import { useNotification } from "../../Components/Notification/notification";
 
 export const VersioningPage = (): JSX.Element => {
     const { fileId } = useParams<{ fileId: string }>();
     const navigate = useNavigate();
+    const notify = useNotification();
 
     const [file, setFile] = React.useState<IFileWithVersions>();
     const [fileVersions, setFileVersions] = React.useState<IFileVersion[]>([]);
@@ -80,6 +82,11 @@ export const VersioningPage = (): JSX.Element => {
         setIsModalOpen(false);
     };
 
+    const onErrorAddNewVersion = (error: any): void => {
+        notify(error.response.data);
+        setIsModalOpen(false);
+    }
+
     const onToggleChange = (event: React.MouseEvent<HTMLElement>, checked?: boolean) => {
         const newValue: boolean = checked ?? false;
         setCompareVersions(checked ?? false);
@@ -106,6 +113,7 @@ export const VersioningPage = (): JSX.Element => {
                 <Modal isOpen={isModalOpen} onDismiss={() => setIsModalOpen(false)}>
                     <AddVersionModal
                         onAddedVersion={addNewVersion}
+                        onErrorAddVersion={onErrorAddNewVersion}
                         originalFileId={fileId}
                         originalFileName={file.name}
                     />

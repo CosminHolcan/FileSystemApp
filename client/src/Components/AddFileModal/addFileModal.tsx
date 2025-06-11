@@ -6,6 +6,7 @@ import { Redundancy } from "../../Enums/Redundancy";
 import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
 import { AppFilesService } from "../../services";
 import { IsNullOrUndefined } from "../../utils";
+import { useNotification } from "../Notification/notification";
 import { errorMessageClassName, extenssionClassName, modalContainerClassName, nameStyles, versionNameStyles } from "./addFileModal.styles";
 import { AddFileModalProps } from "./addFileModal.types";
 
@@ -122,7 +123,7 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
                 props.onAddedFile(response.data)
             })
             .catch(function (error) {
-                console.log(error);
+                props.onError(error);
             });
     };
 

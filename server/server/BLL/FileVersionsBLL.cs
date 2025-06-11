@@ -1,5 +1,5 @@
-﻿using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using server.DAL;
 using server.DAL.Entities;
 using server.DTO;
@@ -18,85 +18,79 @@ namespace server.BLL
             this._appFilesDAL = appFilesDAL;
         }
 
-        public async Task<FileVersionDTO> AddVersion(AddFileVersionDTO dto, IFormFile file )
+        public async Task<FileVersionDTO> AddVersion(AddFileVersionDTO dto, IFormFile file)
         {
-            DateTime startingTime = DateTime.Now;
             AppFile appFile = await _appFilesDAL.GetFileByIdWithStorageAccount(dto.OriginalFileId);
+            DateTime startingTime = DateTime.Now;
+            FileVersionDTO toReturn = null;
+            bool firstFileFailed = false;
 
-            BlobServiceClient blobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-            BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
-
-            BlobHttpHeaders blobHttpHeaders = new BlobHttpHeaders
+            try
             {
-                ContentType = GeneralUtils.GetContentType(appFile.Name),
-                ContentDisposition = "inline"
-            };
+                string versionId = await this.UploadFileToBlob(appFile, file);
 
-            string versionId;
-            using (var stream = file.OpenReadStream())
-            {
-                var result = await blobClient.UploadAsync(
-                    stream,
-                    new BlobUploadOptions { HttpHeaders = blobHttpHeaders });
-                versionId = result.Value.VersionId;
-            }
-
-            var fileVersion = new FileVersion
-            {
-                Name = dto.Name,
-                AzureId = versionId,
-                OriginalFileId = dto.OriginalFileId,
-                CreationTime = startingTime
-            };
-
-            FileVersion createdVersion = await _fileVersionsDAL.AddVersion(fileVersion);
-
-            string azureFileName = appFile.Id.ToString() + Path.GetExtension(appFile.Name);
-
-            FileVersionDTO toReturn = new FileVersionDTO
-            {
-                Id = createdVersion.Id,
-                Name = createdVersion.Name,
-                OriginalFileId = createdVersion.OriginalFileId,
-                CreationTime = createdVersion.CreationTime.ToString("yyyy-MM-dd HH:mm"),
-                TokenSAS = SASTokensGenerator.GenerateSasToken(
-                    appFile.StorageAccount.ConnectionString,
-                    "container",
-                    azureFileName,
-                    createdVersion.AzureId)
-            };
-
-            await this._appFilesDAL.UpdateTimeInteractionsForFile(dto.OriginalFileId, startingTime, true);
-
-            if (appFile.ReplicaId != null)
-            {
-                AppFile replicaAppFile = await _appFilesDAL.GetFileByIdWithStorageAccount((Guid)appFile.ReplicaId);
-
-                BlobServiceClient replicaBlobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
-                BlobContainerClient replicaContainerClient = replicaBlobServiceClient.GetBlobContainerClient("container");
-                BlobClient replicaBlobClient = replicaContainerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
-
-                string replicaVerionId;
-                using (var stream = file.OpenReadStream())
-                {
-                    var result = await replicaBlobClient.UploadAsync(
-                        stream,
-                        new BlobUploadOptions { HttpHeaders = blobHttpHeaders });
-                    replicaVerionId = result.Value.VersionId;
-                }
-
-                var replicaFileVersion = new FileVersion
+                var fileVersion = new FileVersion
                 {
                     Name = dto.Name,
                     AzureId = versionId,
-                    OriginalFileId = (Guid)appFile.ReplicaId,
+                    OriginalFileId = dto.OriginalFileId,
                     CreationTime = startingTime
                 };
 
-                await _fileVersionsDAL.AddVersion(replicaFileVersion);
+                FileVersion createdVersion = await _fileVersionsDAL.AddVersion(fileVersion);
+                await this._appFilesDAL.UpdateTimeInteractionsForFile(dto.OriginalFileId, startingTime, true);
 
-                await this._appFilesDAL.UpdateTimeInteractionsForFile((Guid)appFile.ReplicaId, startingTime, true);
+                toReturn = new FileVersionDTO
+                {
+                    Id = createdVersion.Id,
+                    Name = createdVersion.Name,
+                    OriginalFileId = createdVersion.OriginalFileId,
+                    CreationTime = createdVersion.CreationTime.ToString("yyyy-MM-dd HH:mm"),
+                    TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", GeneralUtils.GetAzureFileName(appFile), createdVersion.AzureId)
+                };
+            }
+            catch
+            {
+                firstFileFailed = true;
+            }
+
+            try
+            {
+                if (appFile.ReplicaId != null)
+                {
+                    AppFile replicaFile = await _appFilesDAL.GetFileByIdWithStorageAccount((Guid)appFile.ReplicaId);
+                    string replicaVerionId = await this.UploadFileToBlob(replicaFile, file);
+
+                    FileVersion replicaFileVersion = new FileVersion
+                    {
+                        Name = dto.Name,
+                        AzureId = replicaVerionId,
+                        OriginalFileId = replicaFile.Id,
+                        CreationTime = startingTime
+                    };
+
+                    FileVersion createdVersion = await _fileVersionsDAL.AddVersion(replicaFileVersion);
+                    await this._appFilesDAL.UpdateTimeInteractionsForFile(replicaFile.Id, startingTime, true);
+
+                    if (firstFileFailed)
+                    {
+                        toReturn = new FileVersionDTO
+                        {
+                            Id = createdVersion.Id,
+                            Name = createdVersion.Name,
+                            OriginalFileId = createdVersion.OriginalFileId,
+                            CreationTime = createdVersion.CreationTime.ToString("yyyy-MM-dd HH:mm"),
+                            TokenSAS = SASTokensGenerator.GenerateSasToken(replicaFile.StorageAccount.ConnectionString, "container", GeneralUtils.GetAzureFileName(replicaFile), createdVersion.AzureId)
+                        };
+
+                    }
+                }
+            }
+            catch { }
+
+            if (toReturn == null)
+            {
+                throw new Exception("Could not add new version for file.");
             }
 
             return toReturn;
@@ -116,6 +110,29 @@ namespace server.BLL
                 AzureId = f.AzureId,
                 TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName, f.AzureId)
             }).ToList();
+        }
+
+        private async Task<string> UploadFileToBlob(AppFile appFile, IFormFile file)
+        {
+            BlobServiceClient blobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
+            BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
+
+            var blobHttpHeaders = new BlobHttpHeaders
+            {
+                ContentType = GeneralUtils.GetContentType(appFile.Name),
+                ContentDisposition = "inline"
+            };
+
+            using (var stream = file.OpenReadStream())
+            {
+                var result = await blobClient.UploadAsync(stream, new BlobUploadOptions
+                {
+                    HttpHeaders = blobHttpHeaders,
+                });
+
+                return result.Value.VersionId;
+            }
         }
     }
 }

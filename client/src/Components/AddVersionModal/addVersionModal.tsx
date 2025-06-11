@@ -1,15 +1,11 @@
-import { Checkbox, Dropdown, IDropdownOption, Icon, Label, Stack, TextField } from "@fluentui/react";
+import { Icon, Label, Stack, TextField } from "@fluentui/react";
 import React from "react";
-import { ICreateFileDTO as IAddFileDTO } from "../../DTO/CreateFileDTO";
-import { FileLocation } from "../../Enums/FileLocation";
-import { Redundancy } from "../../Enums/Redundancy";
-import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
-import { AppFilesService, FileVersionsService } from "../../services";
-import { IsNullOrUndefined } from "../../utils";
-import { errorMessageClassName, modalContainerClassName, nameStyles, versionNameStyles } from "./addVersionModal.styles";
-import { AddVersionModalProps } from "./addVersionModal.types";
-import { IFileVersion } from "../../Models/FileVersion";
 import { IAddFileVersionDTO } from "../../DTO/AddFileVersionDTO";
+import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
+import { FileVersionsService } from "../../services";
+import { IsNullOrUndefined } from "../../utils";
+import { errorMessageClassName, modalContainerClassName, nameStyles } from "./addVersionModal.styles";
+import { AddVersionModalProps } from "./addVersionModal.types";
 
 export const AddVersionModal = (props: AddVersionModalProps): JSX.Element => {
     const [name, setName] = React.useState<string>("");
@@ -65,7 +61,7 @@ export const AddVersionModal = (props: AddVersionModalProps): JSX.Element => {
                 props.onAddedVersion(response.data)
             })
             .catch(function (error) {
-                console.log(error);
+                props.onErrorAddVersion(error);
             });
     };
 

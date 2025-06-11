@@ -1,6 +1,4 @@
-﻿using server.DAL;
-
-namespace DataAbstractionLayer
+﻿namespace server.DAL
 {
     public class BaseDAL
     {

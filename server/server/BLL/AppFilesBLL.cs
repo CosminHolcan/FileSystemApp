@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using server.DAL;
 using server.DAL.Entities;
@@ -28,146 +27,121 @@ namespace server.BLL
         {
             DateTime startingTime = DateTime.Now;
 
-            StorageAccount mainStorage = await _storageAccountsDAL.GetStorageAccountByFeatures(
-                (Location)dto.Location, (Redundancy)dto.Redundancy, (bool)dto.Versioning);
-
             Guid mainFileId = Guid.NewGuid();
             Guid replicaFileId = Guid.NewGuid();
 
-            AppFile mainFile = new AppFile
+            AppFile mainFile = null, replicaFile = null;
+            bool firstFileFailed = false, secondFileFailed = false;
+
+            try
             {
-                Id = mainFileId,
-                UserId = userId,
-                Name = dto.Name,
-                StorageAccountId = mainStorage.Id,
-                CreationDate = DateOnly.FromDateTime(startingTime),
-                LastInteraction = startingTime,
-                LastUpdate = startingTime,
-                ReplicaId = dto.SecondaryLocation != null ? replicaFileId : null,
-                IsReplica = false
-            };
+                StorageAccount mainStorage = await _storageAccountsDAL.GetStorageAccountByFeatures((Location)dto.Location, (Redundancy)dto.Redundancy, (bool)dto.Versioning);
 
-            mainFile = await _appFilesDAL.AddFile(mainFile);
-
-            string mainVersionId = await UploadFileToBlob(mainStorage, mainFile.Id, file, dto.Name, dto.Versioning);
-
-            if (!string.IsNullOrEmpty(mainVersionId))
+                mainFile = await this.CreateAndStoreFile(
+                    mainFileId, dto.Name, userId, mainStorage, startingTime, file,
+                    dto.VersionName, dto.SecondaryLocation != null ? replicaFileId : null, false, (bool)dto.Versioning);
+            }
+            catch
             {
-                await this._fileVersionsDAL.AddVersion(new FileVersion
-                {
-                    Name = dto.VersionName,
-                    AzureId = mainVersionId,
-                    OriginalFileId = mainFileId,
-                    CreationTime = startingTime
-                });
+                firstFileFailed = true;
             }
 
-            if (dto.SecondaryLocation != null)
+            try
             {
-                StorageAccount replicaStorage = await _storageAccountsDAL.GetStorageAccountByFeatures(
-                    (Location)dto.SecondaryLocation, (Redundancy)dto.Redundancy, (bool)dto.Versioning);
-
-                AppFile replicaFile = new AppFile
+                if (dto.SecondaryLocation != null)
                 {
-                    Id = replicaFileId,
-                    UserId = userId,
-                    Name = dto.Name,
-                    StorageAccountId = replicaStorage.Id,
-                    CreationDate = DateOnly.FromDateTime(startingTime),
-                    LastInteraction = startingTime,
-                    LastUpdate = startingTime,
-                    IsReplica = true,
-                    ReplicaId = mainFileId
-                };
+                    StorageAccount replicaStorage = await _storageAccountsDAL.GetStorageAccountByFeatures((Location)dto.SecondaryLocation, (Redundancy)dto.Redundancy, (bool)dto.Versioning);
 
-                replicaFile = await _appFilesDAL.AddFile(replicaFile);
-
-                string replicaVersionId = await UploadFileToBlob(replicaStorage, replicaFile.Id, file, dto.Name, dto.Versioning);
-
-                if (!string.IsNullOrEmpty(replicaVersionId))
-                {
-                    await this._fileVersionsDAL.AddVersion(new FileVersion
-                    {
-                        Name = dto.VersionName,
-                        AzureId = replicaVersionId,
-                        OriginalFileId = replicaFileId,
-                        CreationTime = startingTime
-                    });
+                    replicaFile = await this.CreateAndStoreFile(
+                        replicaFileId, dto.Name, userId, replicaStorage, startingTime, file,
+                        dto.VersionName, mainFileId, true, (bool)dto.Versioning);
                 }
-
+            }
+            catch
+            {
+                secondFileFailed = true;
             }
 
-            return new AppFileDTO
+            if (firstFileFailed && dto.SecondaryLocation == null)
             {
-                Id = mainFile.Id,
-                Name = mainFile.Name,
-                StorageAccountId = mainFile.StorageAccountId,
-                Location = mainStorage.Location,
-                Redundancy = mainFile.ReplicaId != null ? Redundancy.Custom : mainStorage.Redundancy,
-                SecondaryLocation = mainFile.ReplicaId != null ? dto.SecondaryLocation : null,
-                Versioning = mainStorage.Versioning,
-                CreationDate = mainFile.CreationDate.ToShortDateString()
-            };
+                throw new Exception("The file could not be saved.");
+            }
+
+            if (!firstFileFailed || !secondFileFailed)
+            {
+                AppFile successfulFile = !firstFileFailed ? mainFile : replicaFile;
+
+                return new AppFileDTO
+                {
+                    Id = successfulFile.Id,
+                    Name = dto.Name,
+                    StorageAccountId = successfulFile.StorageAccountId,
+                    Location = dto.Location,
+                    Redundancy = dto.SecondaryLocation != null ? Redundancy.Custom : dto.Redundancy,
+                    SecondaryLocation = dto.SecondaryLocation,
+                    Versioning = dto.Versioning,
+                    CreationDate = startingTime.ToShortDateString()
+                };
+            }
+
+            throw new Exception("The file could not be saved.");
         }
 
         public async Task<AppFileDTO> UploadNewContent(Guid fileId, IFormFile file)
         {
             DateTime startingTime = DateTime.Now;
-            AppFile appFile = await _appFilesDAL.GetFileByIdWithStorageAccount(fileId);
+            AppFile appFile = await _appFilesDAL.GetFileByIdWithStorageAccount(fileId), replicaFile = null;
+            bool firstFileFailed = false, secondFileFailed = false;
 
-            BlobServiceClient blobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
-            BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
-
-            BlobHttpHeaders blobHttpHeaders = new BlobHttpHeaders
+            try
             {
-                ContentType = GeneralUtils.GetContentType(appFile.Name),
-                ContentDisposition = "inline"
-            };
-
-            using (var stream = file.OpenReadStream())
+                await this.UploadFileToBlob(appFile.StorageAccount, fileId, file, appFile.Name, appFile.StorageAccount.Versioning);
+                await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, startingTime, true);
+            }
+            catch
             {
-                var result = await blobClient.UploadAsync(
-                    stream,
-                    new BlobUploadOptions { HttpHeaders = blobHttpHeaders });
+                firstFileFailed = true;
             }
 
-            string azureFileName = appFile.Id.ToString() + Path.GetExtension(appFile.Name);
-
-            AppFileDTO toReturn = new AppFileDTO
+            try
             {
-                Id = appFile.Id,
-                Name = appFile.Name,
-                TokenSAS = SASTokensGenerator.GenerateSasToken(
-                    appFile.StorageAccount.ConnectionString,
-                    "container",
-                    azureFileName),
-                Versioning = appFile.StorageAccount.Versioning,
-                ReplicaId = appFile.Id,
-                IsReplica = appFile.IsReplica
-            };
-
-            await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, startingTime, true);
-
-            if (appFile.ReplicaId != null)
-            {
-                AppFile replicaAppFile = await _appFilesDAL.GetFileByIdWithStorageAccount((Guid)appFile.ReplicaId);
-
-                BlobServiceClient replicaBlobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
-                BlobContainerClient replicaContainerClient = replicaBlobServiceClient.GetBlobContainerClient("container");
-                BlobClient replicaBlobClient = replicaContainerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
-
-                using (var stream = file.OpenReadStream())
+                if (appFile.ReplicaId != null)
                 {
-                    var result = await replicaBlobClient.UploadAsync(
-                        stream,
-                        new BlobUploadOptions { HttpHeaders = blobHttpHeaders });
+                    replicaFile = await _appFilesDAL.GetFileByIdWithStorageAccount((Guid)appFile.ReplicaId);
+                    await this.UploadFileToBlob(replicaFile.StorageAccount, fileId, file, replicaFile.Name, replicaFile.StorageAccount.Versioning);
+                    await this._appFilesDAL.UpdateTimeInteractionsForFile((Guid)appFile.ReplicaId, startingTime, true);
                 }
-
-                await this._appFilesDAL.UpdateTimeInteractionsForFile((Guid)appFile.ReplicaId, startingTime, true);
+            }
+            catch
+            {
+                secondFileFailed = true;
             }
 
-            return toReturn;
+            if (firstFileFailed && appFile.ReplicaId == null)
+            {
+                throw new Exception("The file could not be updated.");
+            }
+
+            if (!firstFileFailed || !secondFileFailed)
+            {
+                AppFile successfulFile = !firstFileFailed ? appFile : replicaFile;
+                string azureFileName = successfulFile.Id.ToString() + Path.GetExtension(successfulFile.Name);
+
+                return new AppFileDTO
+                {
+                    Id = successfulFile.Id,
+                    Name = successfulFile.Name,
+                    TokenSAS = SASTokensGenerator.GenerateSasToken(
+                            successfulFile.StorageAccount.ConnectionString,
+                            "container",
+                            azureFileName),
+                    Versioning = successfulFile.StorageAccount.Versioning,
+                    ReplicaId = successfulFile.Id,
+                    IsReplica = successfulFile.IsReplica
+                };
+            }
+
+            throw new Exception("The file could not be updated.");
         }
 
         public async Task<List<AppFileDTO>> GetFilesByUser(Guid userId)
@@ -283,7 +257,7 @@ namespace server.BLL
             file = await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
             if (file == null)
                 return;
-            
+
             if (file.ReplicaId != null)
             {
                 replica = await this._appFilesDAL.GetFileByIdWithStorageAccount((Guid)file.ReplicaId);
@@ -334,6 +308,39 @@ namespace server.BLL
 
                 return versioning == true ? result.Value.VersionId : null;
             }
+        }
+
+        private async Task<AppFile> CreateAndStoreFile(Guid fileId, string name, Guid userId, StorageAccount storageAccount, DateTime timestamp,
+            IFormFile file, string versionName, Guid? replicaId, bool isReplica, bool versioningEnabled)
+        {
+            AppFile appFile = new AppFile
+            {
+                Id = fileId,
+                UserId = userId,
+                Name = name,
+                StorageAccountId = storageAccount.Id,
+                CreationDate = DateOnly.FromDateTime(timestamp),
+                LastInteraction = timestamp,
+                LastUpdate = timestamp,
+                ReplicaId = replicaId,
+                IsReplica = isReplica
+            };
+
+            string versionId = await UploadFileToBlob(storageAccount, fileId, file, name, versioningEnabled);
+            appFile = await _appFilesDAL.AddFile(appFile);
+
+            if (!string.IsNullOrEmpty(versionId))
+            {
+                await _fileVersionsDAL.AddVersion(new FileVersion
+                {
+                    Name = versionName,
+                    AzureId = versionId,
+                    OriginalFileId = fileId,
+                    CreationTime = timestamp
+                });
+            }
+
+            return appFile;
         }
 
         private async Task DeleteFileFromAzure(AppFile appFile)

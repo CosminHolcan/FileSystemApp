@@ -64,7 +64,7 @@ export const UploadNewContentModal = (props: UploadNewContentModalProps): JSX.El
                     props.onAddedContent(response.data)
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    props.onErrorAddedContent(error);
                 });
 
             return;
@@ -78,7 +78,13 @@ export const UploadNewContentModal = (props: UploadNewContentModalProps): JSX.El
         formData.append('dto', JSON.stringify(dto))
         formData.append('file', file as File);
 
-        AppFilesService.UploadNewContent(props.fileId, formData);
+        AppFilesService.UploadNewContent(props.fileId, formData)
+            .then(function (response) {
+                props.onAddedContent(response.data)
+            })
+            .catch(function (error) {
+                props.onErrorAddedContent(error);
+            });
     };
 
     return (
