@@ -89,16 +89,14 @@ export const UploadNewContentModal = (props: UploadNewContentModalProps): JSX.El
 
     return (
         <Stack className={modalContainerClassName} verticalAlign="space-between">
-            <Stack horizontal>
-                {props.versioning &&
-                    <TextField
-                        value={name}
-                        onChange={(event, newValue) => setName(newValue ?? "")}
-                        styles={nameStyles}
-                        placeholder="Version name"
-                    />
-                }
-            </Stack>
+            {props.versioning &&
+                <TextField
+                    value={name}
+                    onChange={(event, newValue) => setName(newValue ?? "")}
+                    styles={nameStyles}
+                    placeholder="Version name"
+                />
+            }
             <Stack>
                 <Label>File</Label>
                 <input

@@ -75,7 +75,7 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                FileWithVersionsDTO fileWithVersionsDTO = await this._appFilesBLL.GetFileByIdWithVersions(fileId);
+                FileWithVersionsDTO fileWithVersionsDTO = await this._appFilesBLL.GetFileByIdWithVersions(userId, fileId);
                 return Ok(fileWithVersionsDTO);
             }
             catch (Exception ex)
@@ -92,7 +92,7 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                AppFile availableFile = await this._appFilesBLL.GetAvailableFileReplica(fileId, false);
+                AppFile availableFile = await this._appFilesBLL.GetAvailableFileReplica(userId, fileId, false);
                 AppFileDTO appFileDTO = await this._appFilesBLL.GetFileById(availableFile);
 
                 return Ok(appFileDTO);
@@ -111,13 +111,13 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                await this._appFilesBLL.UpdateFileName(fileId, dto.NewFileName);
+                await this._appFilesBLL.UpdateFileName(userId, fileId, dto.NewFileName);
 
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("File name could not be updated.");
             }
         }
 
@@ -136,12 +136,12 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dtoData.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                AppFileDTO appFileDTO = await this._appFilesBLL.UploadNewContent(fileId, file);
+                AppFileDTO appFileDTO = await this._appFilesBLL.UploadNewContent(userId, fileId, file);
                 return Ok(appFileDTO);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("Upload for file did not work.");
             }
         }
 
@@ -153,13 +153,13 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                await this._appFilesBLL.DeleteFile(fileId);
+                await this._appFilesBLL.DeleteFile(userId, fileId);
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("File could not be deleted.");
             }
         }
     }

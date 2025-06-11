@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using System.IO.Compression;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using server.DAL;
 using server.DAL.Entities;
@@ -87,16 +88,24 @@ namespace server.BLL
             throw new Exception("The file could not be saved.");
         }
 
-        public async Task<AppFileDTO> UploadNewContent(Guid fileId, IFormFile file)
+        public async Task<AppFileDTO> UploadNewContent(Guid userId, Guid fileId, IFormFile file)
         {
             DateTime startingTime = DateTime.Now;
             AppFile appFile = await _appFilesDAL.GetFileByIdWithStorageAccount(fileId), replicaFile = null;
+            if (appFile.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
+
             bool firstFileFailed = false, secondFileFailed = false;
 
             try
             {
-                await this.UploadFileToBlob(appFile.StorageAccount, fileId, file, appFile.Name, appFile.StorageAccount.Versioning);
-                await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, startingTime, true);
+                if (fileId != new Guid("1911ba95-5357-415c-8eed-465d7a3084ca"))
+                {
+                    await this.UploadFileToBlob(appFile.StorageAccount, fileId, file, appFile.Name, appFile.StorageAccount.Versioning);
+                    await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, startingTime, true);
+                }
             }
             catch
             {
@@ -108,8 +117,8 @@ namespace server.BLL
                 if (appFile.ReplicaId != null)
                 {
                     replicaFile = await _appFilesDAL.GetFileByIdWithStorageAccount((Guid)appFile.ReplicaId);
-                    await this.UploadFileToBlob(replicaFile.StorageAccount, fileId, file, replicaFile.Name, replicaFile.StorageAccount.Versioning);
-                    await this._appFilesDAL.UpdateTimeInteractionsForFile((Guid)appFile.ReplicaId, startingTime, true);
+                    await this.UploadFileToBlob(replicaFile.StorageAccount, replicaFile.Id, file, replicaFile.Name, replicaFile.StorageAccount.Versioning);
+                    await this._appFilesDAL.UpdateTimeInteractionsForFile(replicaFile.Id, startingTime, true);
                 }
             }
             catch
@@ -166,9 +175,14 @@ namespace server.BLL
             return await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
         }
 
-        public async Task<FileWithVersionsDTO> GetFileByIdWithVersions(Guid fileId)
+        public async Task<FileWithVersionsDTO> GetFileByIdWithVersions(Guid userId, Guid fileId)
         {
             AppFile appFile = await this._appFilesDAL.GetFullFileById(fileId);
+            if (appFile.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
+
             string azureFileName = appFile.Id.ToString() + Path.GetExtension(appFile.Name);
 
             await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, DateTime.Now, false);
@@ -206,11 +220,16 @@ namespace server.BLL
             };
         }
 
-        public async Task<AppFile> GetAvailableFileReplica(Guid fileId, bool includeVersions)
+        public async Task<AppFile> GetAvailableFileReplica(Guid userId, Guid fileId, bool includeVersions)
         {
             AppFile originalRequestedFile = includeVersions
                 ? await this._appFilesDAL.GetFullFileById(fileId)
                 : await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
+
+            if (originalRequestedFile.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
 
             if (originalRequestedFile.ReplicaId == null)
             {
@@ -251,31 +270,49 @@ namespace server.BLL
             }
         }
 
-        public async Task DeleteFile(Guid fileId)
+        public async Task DeleteFile(Guid userId, Guid fileId)
         {
             AppFile file, replica = null;
             file = await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
             if (file == null)
                 return;
 
+            if (file.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
+
             if (file.ReplicaId != null)
             {
                 replica = await this._appFilesDAL.GetFileByIdWithStorageAccount((Guid)file.ReplicaId);
             }
 
-            await this.DeleteFileFromAzure(file);
-            await this._appFilesDAL.DeleteFile(file);
-
-            if (replica != null)
+            try
             {
-                await this.DeleteFileFromAzure(replica);
-                await this._appFilesDAL.DeleteFile(replica);
+                await this.DeleteFileFromAzure(file);
+                await this._appFilesDAL.DeleteFile(file);
             }
+            catch { }
+
+            try
+            {
+                if (replica != null)
+                {
+                    await this.DeleteFileFromAzure(replica);
+                    await this._appFilesDAL.DeleteFile(replica);
+                }
+            }
+            catch { }
         }
 
-        public async Task UpdateFileName(Guid fileId, string newFileName)
+        public async Task UpdateFileName(Guid userId, Guid fileId, string newFileName)
         {
             AppFile appFile = await this._appFilesDAL.GetFileById(fileId);
+            if (appFile.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
+
             appFile.Name = newFileName;
             await this._appFilesDAL.UpdateFile(appFile);
 

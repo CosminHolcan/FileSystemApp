@@ -76,4 +76,12 @@ export namespace FileVersionsService {
     export const ReadFilesByOriginalFileId = (originalFileId: string, dto: IBaseDTO) => {
         return axios.post(`${FILE_VERSIONS_URL}/get/${originalFileId}`, dto);
     };
+
+    export const DeleteFileVersion = (fileVersionId: string, dto: IBaseDTO) => {
+        return axios.post(`${FILE_VERSIONS_URL}/delete/${fileVersionId}`, dto);
+    };
+
+    export const UpdateFileVersionName = (fileVersionId: string, dto: IUpdateFileNameDTO) => {
+        return axios.post(`${FILE_VERSIONS_URL}/updateFileVersionName/${fileVersionId}`, dto);
+    };
 };

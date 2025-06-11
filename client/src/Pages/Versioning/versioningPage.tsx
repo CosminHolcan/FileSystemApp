@@ -2,13 +2,14 @@ import { DetailsList, DetailsListLayoutMode, Dropdown, IColumn, Icon, IconButton
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AddVersionModal } from "../../Components/AddVersionModal/addVersionModal";
+import { EditFileVersionNameModal } from "../../Components/EditFileVersionNameModal/editFileVersionNameModal";
 import { FileVisualiser } from "../../Components/FileVisualiser/fileVisualiser";
+import { useNotification } from "../../Components/Notification/notification";
 import { IFileVersion } from "../../Models/FileVersion";
 import { IFileWithVersions } from "../../Models/FileWithVersions";
-import { AppFilesService } from "../../services";
+import { AppFilesService, FileVersionsService } from "../../services";
 import { downloadBlobWithName } from "../../utils";
 import { buttonClassName, containerClassName, iconClassName, listContainerClassName, titleClassName } from "./versioningPage.styles";
-import { useNotification } from "../../Components/Notification/notification";
 
 export const VersioningPage = (): JSX.Element => {
     const { fileId } = useParams<{ fileId: string }>();
@@ -17,10 +18,12 @@ export const VersioningPage = (): JSX.Element => {
 
     const [file, setFile] = React.useState<IFileWithVersions>();
     const [fileVersions, setFileVersions] = React.useState<IFileVersion[]>([]);
-    const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
+    const [isAddVersionModalOpen, setIsAddVersionModalOpen] = React.useState<boolean>(false);
     const [compareVersions, setCompareVersions] = React.useState<boolean>(false);
     const [firstSelectedFile, setFirstSelectedFile] = React.useState<string>();
     const [secondSelectedFile, setSecondSelectedFile] = React.useState<string>();
+    const [editingFileVersion, setEditingFileVersion] = React.useState<IFileVersion>();
+    const [isEditNameModalOpen, setIsEditNameModalOpen] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         if (fileId === undefined) {
@@ -36,6 +39,42 @@ export const VersioningPage = (): JSX.Element => {
 
     const handleDownload = (fileVersion: IFileVersion): void => {
         downloadBlobWithName(fileVersion.tokenSAS as string, getDownloadName(fileVersion));
+    };
+
+    const handleEdit = (fileVersion: IFileVersion): void => {
+        setEditingFileVersion(fileVersion);
+        setIsEditNameModalOpen(true);
+    };
+
+    const onModifyName = (fileVersion: IFileVersion, newName: string): void => {
+        const fileVersionIndex: number = fileVersions.findIndex((fv: IFileVersion) => fv.id === fileVersion.id);
+        if (fileVersionIndex === -1) {
+            setIsEditNameModalOpen(false);
+            setEditingFileVersion(undefined);
+            return;
+        }
+
+        const newFileVersions: IFileVersion[] = [...fileVersions];
+        newFileVersions[fileVersionIndex].name = newName;
+        setFileVersions(newFileVersions);
+        setIsEditNameModalOpen(false);
+    };
+
+    const handleDelete = (fileVersion: IFileVersion): void => {
+        FileVersionsService.DeleteFileVersion(fileVersion.id as string, { jwt: localStorage.getItem("jwt") as string })
+            .then(function (response) {
+                const newFileVersions: IFileVersion[] = fileVersions.filter(fv => fv.id !== fileVersion.id)
+                setFileVersions(newFileVersions);
+                if (firstSelectedFile === fileVersion.id) {
+                    setFirstSelectedFile(undefined);
+                }
+                if (secondSelectedFile === fileVersion.id) {
+                    setSecondSelectedFile(undefined);
+                }            
+            })
+            .catch(function (error) {
+                notify(error.response.data)
+            });
     };
 
     const getDownloadName = (fileVersion: IFileVersion): string => {
@@ -74,18 +113,47 @@ export const VersioningPage = (): JSX.Element => {
                     ariaLabel="Download"
                     onClick={() => handleDownload(item)}
                 />
+        },
+        {
+            key: 'column4',
+            name: 'Edit',
+            fieldName: 'edit',
+            minWidth: 200,
+            isResizable: true,
+            onRender: (item: IFileVersion) =>
+                <IconButton
+                    iconProps={{ iconName: 'Edit' }}
+                    title="Edit"
+                    ariaLabel="Edit"
+                    onClick={() => handleEdit(item)}
+                />
+        },
+        {
+            key: 'column5',
+            name: 'Delete',
+            fieldName: 'delete',
+            minWidth: 200,
+            isResizable: true,
+            onRender: (item: IFileVersion) =>
+                item.id !== fileVersions.at(-1)?.id &&
+                <IconButton
+                    iconProps={{ iconName: 'Delete' }}
+                    title="Delete"
+                    ariaLabel="Delete"
+                    onClick={() => handleDelete(item)}
+                />
         }
     ];
 
     const addNewVersion = (fileVersion: IFileVersion): void => {
         setFileVersions([...fileVersions, fileVersion]);
-        setIsModalOpen(false);
+        setIsAddVersionModalOpen(false);
     };
 
-    const onErrorAddNewVersion = (error: any): void => {
+    const onErrorHandler = (error: any): void => {
         notify(error.response.data);
-        setIsModalOpen(false);
-    }
+        setIsAddVersionModalOpen(false);
+    };
 
     const onToggleChange = (event: React.MouseEvent<HTMLElement>, checked?: boolean) => {
         const newValue: boolean = checked ?? false;
@@ -110,12 +178,21 @@ export const VersioningPage = (): JSX.Element => {
     return (
         <Stack className={containerClassName}>
             {fileId && file &&
-                <Modal isOpen={isModalOpen} onDismiss={() => setIsModalOpen(false)}>
+                <Modal isOpen={isAddVersionModalOpen} onDismiss={() => setIsAddVersionModalOpen(false)}>
                     <AddVersionModal
                         onAddedVersion={addNewVersion}
-                        onErrorAddVersion={onErrorAddNewVersion}
+                        onErrorAddVersion={onErrorHandler}
                         originalFileId={fileId}
                         originalFileName={file.name}
+                    />
+                </Modal>
+            }
+            {editingFileVersion &&
+                <Modal isOpen={isEditNameModalOpen} onDismiss={() => { setIsEditNameModalOpen(false); setEditingFileVersion(undefined); }}>
+                    <EditFileVersionNameModal
+                        fileVersion={editingFileVersion}
+                        onModifiedName={onModifyName}
+                        onError={onErrorHandler}
                     />
                 </Modal>
             }
@@ -128,7 +205,7 @@ export const VersioningPage = (): JSX.Element => {
                 </StackItem>
             </Stack>
             <Stack horizontal horizontalAlign="end" tokens={{ childrenGap: 20 }}>
-                <button className={buttonClassName} onClick={() => setIsModalOpen(true)}>
+                <button className={buttonClassName} onClick={() => setIsAddVersionModalOpen(true)}>
                     <Icon
                         iconName="Add"
                         className={iconClassName}

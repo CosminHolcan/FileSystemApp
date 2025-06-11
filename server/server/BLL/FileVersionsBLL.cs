@@ -18,9 +18,14 @@ namespace server.BLL
             this._appFilesDAL = appFilesDAL;
         }
 
-        public async Task<FileVersionDTO> AddVersion(AddFileVersionDTO dto, IFormFile file)
+        public async Task<FileVersionDTO> AddVersion(Guid userId, AddFileVersionDTO dto, IFormFile file)
         {
             AppFile appFile = await _appFilesDAL.GetFileByIdWithStorageAccount(dto.OriginalFileId);
+            if (appFile.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
+
             DateTime startingTime = DateTime.Now;
             FileVersionDTO toReturn = null;
             bool firstFileFailed = false;
@@ -99,6 +104,7 @@ namespace server.BLL
         public async Task<List<FileVersionDTO>> GetFileVersionsByOriginalFileId(AppFile appFile)
         {
             List<FileVersion> fileVersions = await this._fileVersionsDAL.GetFileVersionsByOriginalFileId(appFile.Id);
+            fileVersions.Sort((v1, v2) => v1.CreationTime.CompareTo(v2.CreationTime));
             string azureFileName = appFile.Id.ToString() + Path.GetExtension(appFile.Name);
 
             return fileVersions.Select(f => new FileVersionDTO()
@@ -111,6 +117,77 @@ namespace server.BLL
                 TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName, f.AzureId)
             }).ToList();
         }
+
+        public async Task DeleteFileVersion(Guid userId, Guid fileVersionId)
+        {
+            FileVersion fileVersion = await this._fileVersionsDAL.GetFileVersionById(fileVersionId);
+            if (fileVersion == null)
+                return;
+
+            AppFile file, replica = null;
+            file = await this._appFilesDAL.GetFileByIdWithStorageAccount(fileVersion.OriginalFileId);
+            if (file == null)
+                return;
+
+            if (file.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
+
+            if (file.ReplicaId != null)
+            {
+                replica = await this._appFilesDAL.GetFileByIdWithStorageAccount((Guid)file.ReplicaId);
+            }
+
+            await this.DeleteFileVersionFromAzure(file, fileVersion);
+            await this._fileVersionsDAL.DeleteFileVersion(fileVersion);
+
+            if (replica != null)
+            {
+                FileVersion replicaFileVersion = replica.Versions.FirstOrDefault(fv => fv.CreationTime == fileVersion.CreationTime);
+                if (replicaFileVersion == null)
+                    return;
+
+                await this.DeleteFileVersionFromAzure(replica, replicaFileVersion);
+                await this._fileVersionsDAL.DeleteFileVersion(replicaFileVersion);
+            }
+        }
+
+        public async Task UpdateFileVersionName(Guid userId, Guid fileVersionId, string newName)
+        {
+            FileVersion fileVersion = await this._fileVersionsDAL.GetFileVersionById(fileVersionId);
+            if (fileVersion == null)
+                return;
+
+            AppFile file, replica = null;
+            file = await this._appFilesDAL.GetFileByIdWithStorageAccount(fileVersion.OriginalFileId);
+            if (file == null)
+                return;
+
+            if (file.UserId != userId)
+            {
+                throw new Exception("Unauthorized operation.");
+            }
+
+            if (file.ReplicaId != null)
+            {
+                replica = await this._appFilesDAL.GetFileByIdWithStorageAccount((Guid)file.ReplicaId);
+            }
+
+            fileVersion.Name = newName;
+            await this._fileVersionsDAL.UpdateFileVersion(fileVersion);
+
+            if (file.ReplicaId != null)
+            {
+                FileVersion replicaFileVersion = replica.Versions.FirstOrDefault(fv => fv.CreationTime == fileVersion.CreationTime);
+                if (replicaFileVersion == null)
+                    return;
+
+                replicaFileVersion.Name = newName;
+                await this._fileVersionsDAL.UpdateFileVersion(replicaFileVersion);
+            }
+        }
+
 
         private async Task<string> UploadFileToBlob(AppFile appFile, IFormFile file)
         {
@@ -133,6 +210,14 @@ namespace server.BLL
 
                 return result.Value.VersionId;
             }
+        }
+        private async Task DeleteFileVersionFromAzure(AppFile appFile, FileVersion fileVersion)
+        {
+            BlobServiceClient serviceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
+            BlobContainerClient containerClient = serviceClient.GetBlobContainerClient("container");
+            BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile)).WithVersion(fileVersion.AzureId);
+
+            await blobClient.DeleteIfExistsAsync();
         }
     }
 }

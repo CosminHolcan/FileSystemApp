@@ -19,5 +19,22 @@ namespace server.DAL
         {
             return await this._dbContext.FileVersions.Where(f => f.OriginalFileId == originalFileId).ToListAsync();
         }
+
+        public async Task<FileVersion> GetFileVersionById(Guid fileVersionId)
+        {
+            return await this._dbContext.FileVersions.FirstOrDefaultAsync(fv => fv.Id == fileVersionId);
+        }
+
+        public async Task DeleteFileVersion(FileVersion fileVersion)
+        {
+            _dbContext.FileVersions.Remove(fileVersion);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateFileVersion(FileVersion updatedFileVersion)
+        {
+            _dbContext.FileVersions.Update(updatedFileVersion);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

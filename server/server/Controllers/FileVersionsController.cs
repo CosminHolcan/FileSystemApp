@@ -38,7 +38,7 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dtoData.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                var result = await _fileVersionsBLL.AddVersion(dtoData, file);
+                var result = await _fileVersionsBLL.AddVersion(userId, dtoData, file);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -55,7 +55,7 @@ namespace server.Controllers
                 JwtSecurityToken token = JWTService.Verify(dto.Jwt);
                 Guid userId = new Guid(token.Issuer);
 
-                AppFile availableFile = await this._appFilesBLL.GetAvailableFileReplica(originalFileId, true);
+                AppFile availableFile = await this._appFilesBLL.GetAvailableFileReplica(userId, originalFileId, true);
                 List<FileVersionDTO> fileVersionsDTO = await this._fileVersionsBLL.GetFileVersionsByOriginalFileId(availableFile);
                 
                 return Ok(fileVersionsDTO);
@@ -63,6 +63,41 @@ namespace server.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("delete/{fileVersionId}")]
+        public async Task<IActionResult> DeleteFileVersion(Guid fileVersionId, [FromBody] BaseDTO dto)
+        {
+            try
+            {
+                JwtSecurityToken token = JWTService.Verify(dto.Jwt);
+                Guid userId = new Guid(token.Issuer);
+
+                await this._fileVersionsBLL.DeleteFileVersion(userId, fileVersionId);
+                return NoContent(); ;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("File version could not be deleted.");
+            }
+        }
+
+        [HttpPost("updateFileVersionName/{fileVersionId}")]
+        public async Task<ActionResult<AppFileDTO>> UpdateFileName(Guid fileVersionId, [FromBody] UpdateFileNameDTO dto)
+        {
+            try
+            {
+                JwtSecurityToken token = JWTService.Verify(dto.Jwt);
+                Guid userId = new Guid(token.Issuer);
+
+                await this._fileVersionsBLL.UpdateFileVersionName(userId, fileVersionId, dto.NewFileName);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("File version name could not be updated.");
             }
         }
     }
