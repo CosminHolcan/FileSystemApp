@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using server.DAL;
 using server.DAL.Entities;
@@ -101,11 +100,8 @@ namespace server.BLL
 
             try
             {
-                if (fileId != new Guid("1911ba95-5357-415c-8eed-465d7a3084ca"))
-                {
-                    await this.UploadFileToBlob(appFile.StorageAccount, fileId, file, appFile.Name, appFile.StorageAccount.Versioning);
-                    await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, startingTime, true);
-                }
+                await this.UploadFileToBlob(appFile.StorageAccount, fileId, file, appFile.Name, appFile.StorageAccount.Versioning);
+                await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, startingTime, true);
             }
             catch
             {
