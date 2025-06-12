@@ -116,7 +116,7 @@ export const VersioningPage = (): JSX.Element => {
         },
         {
             key: 'column4',
-            name: 'Edit',
+            name: 'Edit Name',
             fieldName: 'edit',
             minWidth: 200,
             isResizable: true,
