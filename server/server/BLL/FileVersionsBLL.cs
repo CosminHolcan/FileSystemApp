@@ -50,7 +50,7 @@ namespace server.BLL
                     Id = createdVersion.Id,
                     Name = createdVersion.Name,
                     OriginalFileId = createdVersion.OriginalFileId,
-                    CreationTime = createdVersion.CreationTime.ToString("dd-MM-yyy HH:mm"),
+                    CreationTime = GeneralUtils.FormatDateTime(createdVersion.CreationTime),
                     TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", GeneralUtils.GetAzureFileName(appFile), createdVersion.AzureId)
                 };
             }
@@ -84,7 +84,7 @@ namespace server.BLL
                             Id = createdVersion.Id,
                             Name = createdVersion.Name,
                             OriginalFileId = createdVersion.OriginalFileId,
-                            CreationTime = createdVersion.CreationTime.ToString("dd-MM-yyy HH:mm"),
+                            CreationTime = GeneralUtils.FormatDateTime(createdVersion.CreationTime),
                             TokenSAS = SASTokensGenerator.GenerateSasToken(replicaFile.StorageAccount.ConnectionString, "container", GeneralUtils.GetAzureFileName(replicaFile), createdVersion.AzureId)
                         };
 
@@ -112,7 +112,7 @@ namespace server.BLL
                 Id = f.Id,
                 Name = f.Name,
                 OriginalFileId = f.OriginalFileId,
-                CreationTime = f.CreationTime.ToString("dd-MM-yyy HH:mm"),
+                CreationTime = GeneralUtils.FormatDateTime(f.CreationTime),
                 AzureId = f.AzureId,
                 TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName, f.AzureId)
             }).ToList();

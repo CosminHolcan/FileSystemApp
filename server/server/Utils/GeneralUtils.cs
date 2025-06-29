@@ -26,5 +26,20 @@ namespace server.Utils
         {
             return appFile.Id.ToString() + Path.GetExtension(appFile.Name);
         }
+
+        public static string FormatDateOnly(DateOnly date)
+        {
+            return date.ToString("dd-MM-yyy");
+        }
+
+        public static string FormatDateOnly(DateTime date)
+        {
+            return date.AddHours(3).ToString("dd-MM-yyy");
+        }
+
+        public static string FormatDateTime(DateTime date)
+        {
+            return date.AddHours(3).ToString("dd-MM-yyy HH:mm");
+        }
     }
 }

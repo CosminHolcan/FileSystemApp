@@ -80,7 +80,7 @@ namespace server.BLL
                     Redundancy = dto.SecondaryLocation != null ? Redundancy.Custom : dto.Redundancy,
                     SecondaryLocation = dto.SecondaryLocation,
                     Versioning = dto.Versioning,
-                    CreationDate = startingTime.ToString("dd-MM-yyy")
+                    CreationDate = GeneralUtils.FormatDateTime(startingTime)
                 };
             }
 
@@ -158,7 +158,7 @@ namespace server.BLL
                 Id = f.Id,
                 Name = f.Name,
                 StorageAccountId = f.StorageAccountId,
-                CreationDate = f.CreationDate.ToString("dd-MM-yyy"),
+                CreationDate = GeneralUtils.FormatDateOnly(f.CreationDate),
                 Location = f.StorageAccount.Location,
                 SecondaryLocation = f.ReplicaId != null ? files.Find(r => r.Id == f.ReplicaId).StorageAccount.Location : null,
                 Redundancy = f.ReplicaId != null ? Redundancy.Custom : f.StorageAccount.Redundancy,
@@ -192,7 +192,7 @@ namespace server.BLL
                     Id = v.Id,
                     Name = v.Name,
                     AzureId = v.AzureId,
-                    CreationTime = v.CreationTime.ToString("dd-MM-yyy HH:mm"),
+                    CreationTime = GeneralUtils.FormatDateTime(v.CreationTime),
                     OriginalFileId = v.OriginalFileId,
                     TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName, v.AzureId)
                 }).ToList(),
