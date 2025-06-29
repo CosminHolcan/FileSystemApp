@@ -80,7 +80,7 @@ namespace server.BLL
                     Redundancy = dto.SecondaryLocation != null ? Redundancy.Custom : dto.Redundancy,
                     SecondaryLocation = dto.SecondaryLocation,
                     Versioning = dto.Versioning,
-                    CreationDate = startingTime.ToShortDateString()
+                    CreationDate = startingTime.ToString("dd-MM-yyy")
                 };
             }
 
@@ -158,7 +158,7 @@ namespace server.BLL
                 Id = f.Id,
                 Name = f.Name,
                 StorageAccountId = f.StorageAccountId,
-                CreationDate = f.CreationDate.ToShortDateString(),
+                CreationDate = f.CreationDate.ToString("dd-MM-yyy"),
                 Location = f.StorageAccount.Location,
                 SecondaryLocation = f.ReplicaId != null ? files.Find(r => r.Id == f.ReplicaId).StorageAccount.Location : null,
                 Redundancy = f.ReplicaId != null ? Redundancy.Custom : f.StorageAccount.Redundancy,
@@ -192,7 +192,7 @@ namespace server.BLL
                     Id = v.Id,
                     Name = v.Name,
                     AzureId = v.AzureId,
-                    CreationTime = v.CreationTime.ToShortDateString() + " " + v.CreationTime.ToShortTimeString(),
+                    CreationTime = v.CreationTime.ToString("dd-MM-yyy HH:mm"),
                     OriginalFileId = v.OriginalFileId,
                     TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName, v.AzureId)
                 }).ToList(),
@@ -221,11 +221,6 @@ namespace server.BLL
             AppFile originalRequestedFile = includeVersions
                 ? await this._appFilesDAL.GetFullFileById(fileId)
                 : await this._appFilesDAL.GetFileByIdWithStorageAccount(fileId);
-
-            if (originalRequestedFile.UserId != userId)
-            {
-                throw new Exception("Unauthorized operation.");
-            }
 
             if (originalRequestedFile.ReplicaId == null)
             {
