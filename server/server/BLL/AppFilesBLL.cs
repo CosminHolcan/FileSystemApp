@@ -80,7 +80,7 @@ namespace server.BLL
                     Redundancy = dto.SecondaryLocation != null ? Redundancy.Custom : dto.Redundancy,
                     SecondaryLocation = dto.SecondaryLocation,
                     Versioning = dto.Versioning,
-                    CreationDate = GeneralUtils.FormatDateTime(startingTime)
+                    CreationDate = GeneralUtils.FormatDateOnly(startingTime)
                 };
             }
 
