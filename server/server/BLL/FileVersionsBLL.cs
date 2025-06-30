@@ -139,18 +139,26 @@ namespace server.BLL
                 replica = await this._appFilesDAL.GetFileByIdWithStorageAccount((Guid)file.ReplicaId);
             }
 
-            await this.DeleteFileVersionFromAzure(file, fileVersion);
-            await this._fileVersionsDAL.DeleteFileVersion(fileVersion);
-
-            if (replica != null)
+            try
             {
-                FileVersion replicaFileVersion = replica.Versions.FirstOrDefault(fv => fv.CreationTime == fileVersion.CreationTime);
-                if (replicaFileVersion == null)
-                    return;
-
-                await this.DeleteFileVersionFromAzure(replica, replicaFileVersion);
-                await this._fileVersionsDAL.DeleteFileVersion(replicaFileVersion);
+                await this._fileVersionsDAL.DeleteFileVersion(fileVersion);
+                await this.DeleteFileVersionFromAzure(file, fileVersion);
             }
+            catch { }
+
+            try
+            {
+                if (replica != null)
+                {
+                    FileVersion replicaFileVersion = replica.Versions.FirstOrDefault(fv => fv.CreationTime == fileVersion.CreationTime);
+                    if (replicaFileVersion == null)
+                        return;
+
+                    await this._fileVersionsDAL.DeleteFileVersion(replicaFileVersion);
+                    await this.DeleteFileVersionFromAzure(replica, replicaFileVersion);
+                }
+            }
+            catch { }
         }
 
         public async Task UpdateFileVersionName(Guid userId, Guid fileVersionId, string newName)

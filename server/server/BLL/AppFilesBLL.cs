@@ -280,8 +280,8 @@ namespace server.BLL
 
             try
             {
-                await this.DeleteFileFromAzure(file);
                 await this._appFilesDAL.DeleteFile(file);
+                await this.DeleteFileFromAzure(file);
             }
             catch { }
 
@@ -289,8 +289,8 @@ namespace server.BLL
             {
                 if (replica != null)
                 {
-                    await this.DeleteFileFromAzure(replica);
                     await this._appFilesDAL.DeleteFile(replica);
+                    await this.DeleteFileFromAzure(replica);
                 }
             }
             catch { }
