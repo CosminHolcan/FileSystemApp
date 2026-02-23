@@ -5,6 +5,10 @@ on:
     branches:
       - main  # Trigger deployment on push to main branch
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     name: Build and Deploy Fullstack App
