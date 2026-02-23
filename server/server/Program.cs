@@ -1,37 +1,49 @@
-using server.DAL;
 using Microsoft.EntityFrameworkCore;
 using server.BLL;
-using server.Utils;
+using server.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+// CORS
+builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", policy =>
 {
-    builder
+    policy
         .AllowAnyMethod()
         .AllowAnyHeader()
         .WithOrigins("http://localhost:3000");
 }));
 
+// ----------------------
+// Database setup
+// ----------------------
 
-var dbUser = builder.Configuration["dbUser"];
-var dbPassword = builder.Configuration["dbPassword"];
+// Read connection string from Azure Web App Configuration
+// Make sure the connection string name in Azure is "DbConnection"
+var connectionString = builder.Configuration.GetConnectionString("DbConnection");
 
-var connectionString = $"Server=tcp:filesystemappdbserver.database.windows.net,1433;Initial Catalog=filesystemappdb;Persist Security Info=False;User ID={dbUser};Password={dbPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-builder.Services.AddDbContext<FileSystemAppDbContext>(options => options.UseSqlServer(connectionString));
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DbConnection' not found in configuration.");
+}
 
+// Configure DbContext to use SQL Server with Managed Identity / Azure AD token
+builder.Services.AddDbContext<FileSystemAppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Register DAL services
 builder.Services.AddScoped<UsersDAL>();
 builder.Services.AddScoped<AppFilesDAL>();
 builder.Services.AddScoped<StorageAccountsDAL>();
 builder.Services.AddScoped<FileVersionsDAL>();
 
+// Register BLL services
 builder.Services.AddScoped<UsersBLL>();
 builder.Services.AddScoped<AppFilesBLL>();
 builder.Services.AddScoped<StorageAccountsBLL>();
@@ -39,12 +51,18 @@ builder.Services.AddScoped<FileVersionsBLL>();
 
 var app = builder.Build();
 
+// ----------------------
+// Run database migrations at startup
+// ----------------------
 using (var scope = app.Services.CreateScope())
 {
-    //var db = scope.ServiceProvider.GetRequiredService<FileSystemAppDbContext>();
-    //db.Database.Migrate();
+    var db = scope.ServiceProvider.GetRequiredService<FileSystemAppDbContext>();
+    db.Database.Migrate(); // Will create database if it doesn't exist and apply any pending migrations
 }
 
+// ----------------------
+// Middleware
+// ----------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -53,9 +71,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseHttpsRedirection();
-
 app.UseCors("CorsPolicy");
-
 app.UseAuthorization();
 
 app.MapControllers();
