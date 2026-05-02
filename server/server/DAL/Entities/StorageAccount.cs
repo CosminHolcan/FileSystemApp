@@ -6,7 +6,7 @@ namespace server.DAL.Entities
     {
         public Guid Id { get; set; }
 
-        public string ConnectionString { get; set; }
+        public string BlobServicePath { get; set; }
 
         public Location Location { get; set; }
 

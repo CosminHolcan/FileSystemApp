@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Identity;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using server.DAL;
 using server.DAL.Entities;
@@ -51,7 +52,7 @@ namespace server.BLL
                     Name = createdVersion.Name,
                     OriginalFileId = createdVersion.OriginalFileId,
                     CreationTime = GeneralUtils.FormatDateTime(createdVersion.CreationTime),
-                    TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", GeneralUtils.GetAzureFileName(appFile), createdVersion.AzureId)
+                    TokenSAS = await SASTokensGenerator.GenerateSasTokenAsync(appFile.StorageAccount.BlobServicePath, "container", GeneralUtils.GetAzureFileName(appFile), createdVersion.AzureId)
                 };
             }
             catch
@@ -85,7 +86,7 @@ namespace server.BLL
                             Name = createdVersion.Name,
                             OriginalFileId = createdVersion.OriginalFileId,
                             CreationTime = GeneralUtils.FormatDateTime(createdVersion.CreationTime),
-                            TokenSAS = SASTokensGenerator.GenerateSasToken(replicaFile.StorageAccount.ConnectionString, "container", GeneralUtils.GetAzureFileName(replicaFile), createdVersion.AzureId)
+                            TokenSAS = await SASTokensGenerator.GenerateSasTokenAsync(replicaFile.StorageAccount.BlobServicePath, "container", GeneralUtils.GetAzureFileName(replicaFile), createdVersion.AzureId)
                         };
 
                     }
@@ -107,15 +108,22 @@ namespace server.BLL
             fileVersions.Sort((v1, v2) => v1.CreationTime.CompareTo(v2.CreationTime));
             string azureFileName = appFile.Id.ToString() + Path.GetExtension(appFile.Name);
 
-            return fileVersions.Select(f => new FileVersionDTO()
+            var result = new List<FileVersionDTO>();
+            foreach (var f in fileVersions)
             {
-                Id = f.Id,
-                Name = f.Name,
-                OriginalFileId = f.OriginalFileId,
-                CreationTime = GeneralUtils.FormatDateTime(f.CreationTime),
-                AzureId = f.AzureId,
-                TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName, f.AzureId)
-            }).ToList();
+                var token = await SASTokensGenerator.GenerateSasTokenAsync(appFile.StorageAccount.BlobServicePath, "container", azureFileName, f.AzureId);
+                result.Add(new FileVersionDTO()
+                {
+                    Id = f.Id,
+                    Name = f.Name,
+                    OriginalFileId = f.OriginalFileId,
+                    CreationTime = GeneralUtils.FormatDateTime(f.CreationTime),
+                    AzureId = f.AzureId,
+                    TokenSAS = token
+                });
+            }
+
+            return result;
         }
 
         public async Task DeleteFileVersion(Guid userId, Guid fileVersionId)
@@ -199,7 +207,7 @@ namespace server.BLL
 
         private async Task<string> UploadFileToBlob(AppFile appFile, IFormFile file)
         {
-            BlobServiceClient blobServiceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
+            BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(appFile.StorageAccount.BlobServicePath), new DefaultAzureCredential());
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
             BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
 
@@ -221,7 +229,7 @@ namespace server.BLL
         }
         private async Task DeleteFileVersionFromAzure(AppFile appFile, FileVersion fileVersion)
         {
-            BlobServiceClient serviceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
+            BlobServiceClient serviceClient = new BlobServiceClient(new Uri(appFile.StorageAccount.BlobServicePath), new DefaultAzureCredential());
             BlobContainerClient containerClient = serviceClient.GetBlobContainerClient("container");
             BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile)).WithVersion(fileVersion.AzureId);
 

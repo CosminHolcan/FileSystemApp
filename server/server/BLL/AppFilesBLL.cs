@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Identity;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using server.DAL;
 using server.DAL.Entities;
@@ -136,8 +137,8 @@ namespace server.BLL
                 {
                     Id = successfulFile.Id,
                     Name = successfulFile.Name,
-                    TokenSAS = SASTokensGenerator.GenerateSasToken(
-                            successfulFile.StorageAccount.ConnectionString,
+                    TokenSAS = await SASTokensGenerator.GenerateSasTokenAsync(
+                            successfulFile.StorageAccount.BlobServicePath,
                             "container",
                             azureFileName),
                     Versioning = successfulFile.StorageAccount.Versioning,
@@ -183,19 +184,26 @@ namespace server.BLL
 
             await this._appFilesDAL.UpdateTimeInteractionsForFile(fileId, DateTime.Now, false);
 
-            return new FileWithVersionsDTO()
+            var versions = new List<FileVersionDTO>();
+            foreach (var v in appFile.Versions)
             {
-                Id = appFile.Id,
-                Name = appFile.Name,
-                Versions = appFile.Versions.Select(v => new FileVersionDTO()
+                string token = await SASTokensGenerator.GenerateSasTokenAsync(appFile.StorageAccount.BlobServicePath, "container", azureFileName, v.AzureId);
+                versions.Add(new FileVersionDTO()
                 {
                     Id = v.Id,
                     Name = v.Name,
                     AzureId = v.AzureId,
                     CreationTime = GeneralUtils.FormatDateTime(v.CreationTime),
                     OriginalFileId = v.OriginalFileId,
-                    TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName, v.AzureId)
-                }).ToList(),
+                    TokenSAS = token
+                });
+            }
+
+            return new FileWithVersionsDTO()
+            {
+                Id = appFile.Id,
+                Name = appFile.Name,
+                Versions = versions,
             };
         }
 
@@ -210,7 +218,7 @@ namespace server.BLL
                 Id = appFile.Id,
                 Name = appFile.Name,
                 Versioning = appFile.StorageAccount.Versioning,
-                TokenSAS = SASTokensGenerator.GenerateSasToken(appFile.StorageAccount.ConnectionString, "container", azureFileName),
+                TokenSAS = await SASTokensGenerator.GenerateSasTokenAsync(appFile.StorageAccount.BlobServicePath, "container", azureFileName),
                 ReplicaId = appFile.Id,
                 IsReplica = appFile.IsReplica
             };
@@ -236,7 +244,7 @@ namespace server.BLL
 
             try
             {
-                BlobServiceClient blobServiceClient = new BlobServiceClient(firstCheckedFile.StorageAccount.ConnectionString);
+                BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(firstCheckedFile.StorageAccount.BlobServicePath), new DefaultAzureCredential());
                 BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
                 BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(firstCheckedFile));
 
@@ -247,7 +255,7 @@ namespace server.BLL
             {
                 try
                 {
-                    BlobServiceClient blobServiceClient = new BlobServiceClient(secondCheckedFile.StorageAccount.ConnectionString);
+                    BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(secondCheckedFile.StorageAccount.BlobServicePath), new DefaultAzureCredential());
                     BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
                     BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(secondCheckedFile));
 
@@ -317,7 +325,7 @@ namespace server.BLL
 
         private async Task<string> UploadFileToBlob(StorageAccount storageAccount, Guid fileId, IFormFile file, string originalFileName, bool? versioning)
         {
-            BlobServiceClient blobServiceClient = new BlobServiceClient(storageAccount.ConnectionString);
+            BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(storageAccount.BlobServicePath), new DefaultAzureCredential());
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("container");
             BlobClient blobClient = containerClient.GetBlobClient(fileId.ToString() + Path.GetExtension(originalFileName));
 
@@ -373,7 +381,7 @@ namespace server.BLL
 
         private async Task DeleteFileFromAzure(AppFile appFile)
         {
-            BlobServiceClient serviceClient = new BlobServiceClient(appFile.StorageAccount.ConnectionString);
+            BlobServiceClient serviceClient = new BlobServiceClient(new Uri(appFile.StorageAccount.BlobServicePath), new DefaultAzureCredential());
             BlobContainerClient containerClient = serviceClient.GetBlobContainerClient("container");
             BlobClient blobClient = containerClient.GetBlobClient(GeneralUtils.GetAzureFileName(appFile));
 
