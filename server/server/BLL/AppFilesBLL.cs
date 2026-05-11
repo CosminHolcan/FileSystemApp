@@ -15,13 +15,15 @@ namespace server.BLL
         private AppFilesDAL _appFilesDAL;
         private FileVersionsDAL _fileVersionsDAL;
         private StorageAccountsDAL _storageAccountsDAL;
+        private readonly ILogger<AppFilesBLL> _logger;
 
-        public AppFilesBLL(UsersDAL usersDAL, AppFilesDAL appFilesDAL, FileVersionsDAL fileVersionsDAL, StorageAccountsDAL storageAccountsDAL)
+        public AppFilesBLL(UsersDAL usersDAL, AppFilesDAL appFilesDAL, FileVersionsDAL fileVersionsDAL, StorageAccountsDAL storageAccountsDAL, ILogger<AppFilesBLL> logger)
         {
             this._usersDAL = usersDAL;
             this._appFilesDAL = appFilesDAL;
             this._fileVersionsDAL = fileVersionsDAL;
             this._storageAccountsDAL = storageAccountsDAL;
+            this._logger = logger;
         }
 
         public async Task<AppFileDTO> AddFile(CreateFileDTO dto, Guid userId, IFormFile file)
@@ -42,9 +44,10 @@ namespace server.BLL
                     mainFileId, dto.Name, userId, mainStorage, startingTime, file,
                     dto.VersionName, dto.SecondaryLocation != null ? replicaFileId : null, false, (bool)dto.Versioning);
             }
-            catch
+            catch (Exception ex)
             {
                 firstFileFailed = true;
+                _logger.LogError(ex, "Error while creating and storing the main file with id {FileId} for user {UserId}", mainFileId, userId);
             }
 
             try
