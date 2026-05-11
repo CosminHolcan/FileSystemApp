@@ -74,7 +74,7 @@ export const RegisterPage = (): JSX.Element => {
                     </Label>
                     <TextField
                         rows={1}
-                        value={email}
+                        value={firstName}
                         onChange={(event: any) => setFirstName(event.target.value)}
                     />
                 </StackItem>
@@ -84,7 +84,7 @@ export const RegisterPage = (): JSX.Element => {
                     </Label>
                     <TextField
                         rows={1}
-                        value={email}
+                        value={lastName}
                         onChange={(event: any) => setLastName(event.target.value)}
                     />
                 </StackItem>
