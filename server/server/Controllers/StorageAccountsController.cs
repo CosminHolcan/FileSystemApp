@@ -1,8 +1,8 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using server.BLL;
 using server.DTO;
 using server.Utils;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace server.Controllers
 {

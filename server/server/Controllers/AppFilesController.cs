@@ -1,12 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Text.Json;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using server.BLL;
 using server.DAL.Entities;
 using server.DTO;
 using server.Utils;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 
 namespace server.Controllers
 {
@@ -26,7 +24,7 @@ namespace server.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<ActionResult<AppFileDTO>> AddFile([FromForm] IFormFile file,[FromForm] string dto)
+        public async Task<ActionResult<AppFileDTO>> AddFile([FromForm] IFormFile file, [FromForm] string dto)
         {
             try
             {

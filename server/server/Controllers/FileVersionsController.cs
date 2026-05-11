@@ -1,12 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Text.Json;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using server.BLL;
 using server.DAL.Entities;
 using server.DTO;
 using server.Utils;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 
 namespace server.Controllers
 {
@@ -57,7 +55,7 @@ namespace server.Controllers
 
                 AppFile availableFile = await this._appFilesBLL.GetAvailableFileReplica(userId, originalFileId, true);
                 List<FileVersionDTO> fileVersionsDTO = await this._fileVersionsBLL.GetFileVersionsByOriginalFileId(availableFile);
-                
+
                 return Ok(fileVersionsDTO);
             }
             catch (Exception ex)

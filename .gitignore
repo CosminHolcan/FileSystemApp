@@ -362,3 +362,4 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+/server/server/.github/copilot-instructions.md
