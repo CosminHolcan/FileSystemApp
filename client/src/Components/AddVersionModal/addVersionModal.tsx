@@ -1,10 +1,9 @@
 import { Icon, Label, Stack, TextField } from "@fluentui/react";
 import React from "react";
 import { IAddFileVersionDTO } from "../../DTO/AddFileVersionDTO";
-import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
 import { FileVersionsService } from "../../services";
+import { errorMessageClassName, iconWithMarginClassName, primaryButtonClassName, smallModalContainerClassName, standardTextInputStyles } from "../../styles";
 import { IsNullOrUndefined } from "../../utils";
-import { errorMessageClassName, modalContainerClassName, nameStyles } from "./addVersionModal.styles";
 import { AddVersionModalProps } from "./addVersionModal.types";
 
 export const AddVersionModal = (props: AddVersionModalProps): JSX.Element => {
@@ -66,12 +65,12 @@ export const AddVersionModal = (props: AddVersionModalProps): JSX.Element => {
     };
 
     return (
-        <Stack className={modalContainerClassName} verticalAlign="space-between">
+        <Stack className={smallModalContainerClassName} verticalAlign="space-between">
             <Stack horizontal>
                 <TextField
                     value={name}
                     onChange={(event, newValue) => setName(newValue ?? "")}
-                    styles={nameStyles}
+                    styles={standardTextInputStyles}
                     label="Version Name"
                 />
             </Stack>
@@ -82,9 +81,9 @@ export const AddVersionModal = (props: AddVersionModalProps): JSX.Element => {
                     onChange={onFileChange}
                 />
             </Stack>
-            <button className={buttonClassName} onClick={handleAddVersion}>
+            <button className={primaryButtonClassName} onClick={handleAddVersion}>
                 <Icon
-                    className={iconClassName}
+                    className={iconWithMarginClassName}
                     iconName="Save"
                 />
                 Save

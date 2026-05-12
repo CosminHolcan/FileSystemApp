@@ -2,8 +2,15 @@ import { Label, Stack, StackItem, TextField } from "@fluentui/react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ILoginUserDTO } from "../../DTO/LoginUserDTO";
+import {
+    authPageBackgroundStyle,
+    loginFormContainerStyle,
+    authLabelStyle,
+    authButtonStyle,
+    authButtonWithMarginStyle,
+    authErrorMessageStyle
+} from "../../styles";
 import { UsersService } from "../../services";
-import { ButtonLoginStyle, ButtonRegisterStyle, EmailContainerStyle, ErrorMessageStyle, LabelStyle, LoginContainerStyle, LoginFormContainerStyle, PasswordContainerStyle } from "./loginPage.styles";
 
 export const LoginPage = (): JSX.Element => {
     const navigate = useNavigate();
@@ -37,10 +44,10 @@ export const LoginPage = (): JSX.Element => {
     }
 
     return (
-        <Stack style={LoginContainerStyle} horizontalAlign="center" verticalAlign="center">
-            <Stack style={LoginFormContainerStyle}>
-                <StackItem style={EmailContainerStyle}>
-                    <Label style={LabelStyle}>
+        <Stack style={authPageBackgroundStyle} horizontalAlign="center" verticalAlign="center">
+            <Stack style={loginFormContainerStyle}>
+                <StackItem style={{ height: "5vh", width: "20vw", marginRight: "5vw", marginLeft: "5vw", marginTop: "10vh" }}>
+                    <Label style={authLabelStyle}>
                         Email
                     </Label>
                     <TextField
@@ -49,8 +56,8 @@ export const LoginPage = (): JSX.Element => {
                         onChange={(event: any) => { setEmail(event.target.value); }}
                     />
                 </StackItem>
-                <StackItem style={PasswordContainerStyle}>
-                    <Label style={LabelStyle}>
+                <StackItem style={{ height: "5vh", width: "20vw", marginRight: "5vw", marginLeft: "5vw", marginTop: "8vh", marginBottom: "12vh" }}>
+                    <Label style={authLabelStyle}>
                         Password
                     </Label>
                     <TextField
@@ -62,10 +69,10 @@ export const LoginPage = (): JSX.Element => {
                     />
                 </StackItem>
                 <Stack horizontalAlign="center" horizontal>
-                    <button style={ButtonLoginStyle} onClick={handleSubmit}>Log in</button>
-                    <button style={ButtonRegisterStyle} onClick={redirectCreateNewAccount}>Create a new account</button>
+                    <button style={authButtonStyle} onClick={handleSubmit}>Log in</button>
+                    <button style={authButtonWithMarginStyle} onClick={redirectCreateNewAccount}>Create a new account</button>
                 </Stack>
-                <Label style={ErrorMessageStyle}>
+                <Label style={authErrorMessageStyle}>
                     {errorMessage}
                 </Label>
             </Stack>

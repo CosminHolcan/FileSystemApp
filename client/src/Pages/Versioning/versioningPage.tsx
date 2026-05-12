@@ -8,8 +8,8 @@ import { useNotification } from "../../Components/Notification/notification";
 import { IFileVersion } from "../../Models/FileVersion";
 import { IFileWithVersions } from "../../Models/FileWithVersions";
 import { AppFilesService, FileVersionsService } from "../../services";
+import { iconWithMarginClassName, pageContainerClassName, pageListContainerClassName, pageTitleClassName, primaryButtonClassName } from "../../styles";
 import { downloadBlobWithName } from "../../utils";
-import { buttonClassName, containerClassName, iconClassName, listContainerClassName, titleClassName } from "./versioningPage.styles";
 
 export const VersioningPage = (): JSX.Element => {
     const { fileId } = useParams<{ fileId: string }>();
@@ -70,7 +70,7 @@ export const VersioningPage = (): JSX.Element => {
                 }
                 if (secondSelectedFile === fileVersion.id) {
                     setSecondSelectedFile(undefined);
-                }            
+                }
             })
             .catch(function (error) {
                 notify(error.response.data)
@@ -176,7 +176,7 @@ export const VersioningPage = (): JSX.Element => {
     };
 
     return (
-        <Stack className={containerClassName}>
+        <Stack className={pageContainerClassName} horizontalAlign="center">
             {fileId && file &&
                 <Modal isOpen={isAddVersionModalOpen} onDismiss={() => setIsAddVersionModalOpen(false)}>
                     <AddVersionModal
@@ -196,7 +196,7 @@ export const VersioningPage = (): JSX.Element => {
                     />
                 </Modal>
             }
-            <Stack className={titleClassName} horizontal horizontalAlign="space-between">
+            <Stack className={pageTitleClassName} horizontal horizontalAlign="space-between">
                 <StackItem style={{ fontSize: "25px", color: "#004e8c" }}>
                     File System App
                 </StackItem>
@@ -205,23 +205,23 @@ export const VersioningPage = (): JSX.Element => {
                 </StackItem>
             </Stack>
             <Stack horizontal horizontalAlign="end" tokens={{ childrenGap: 20 }}>
-                <button className={buttonClassName} onClick={() => setIsAddVersionModalOpen(true)}>
+                <button className={primaryButtonClassName} onClick={() => setIsAddVersionModalOpen(true)}>
                     <Icon
                         iconName="Add"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Add version
                 </button>
-                <button className={buttonClassName} onClick={() => navigate("/home")}>
+                <button className={primaryButtonClassName} onClick={() => navigate("/home")}>
                     <Icon
                         iconName="Home"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Home
                 </button>
             </Stack>
             {fileVersions?.length > 0 &&
-                <div className={listContainerClassName}>
+                <div className={pageListContainerClassName}>
                     <DetailsList
                         items={fileVersions}
                         columns={columns}

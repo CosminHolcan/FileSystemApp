@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useState } from "react";
-import { containerClassName, notificationClassName } from "./notification.styles";
+import { notificationBadgeClassName, notificationContainerClassName } from "./notification.styles";
 import { CustomNotification, NotificationContextType, NotificationProviderProps } from "./notification.types";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -24,9 +24,9 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     return (
         <NotificationContext.Provider value={{ notify }}>
             {children}
-            <div className={containerClassName}>
+            <div className={notificationContainerClassName}>
                 {notifications.map(({ id, message }) => (
-                    <div key={id} className={notificationClassName}>
+                    <div key={id} className={notificationBadgeClassName}>
                         {message}
                     </div>
                 ))}

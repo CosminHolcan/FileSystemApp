@@ -1,8 +1,7 @@
 import { Icon, Label, Stack, TextField } from "@fluentui/react";
 import React from "react";
-import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
 import { FileVersionsService } from "../../services";
-import { errorMessageClassName, modalContainerClassName, nameStyles } from "./editFileVersionNameModal.styles";
+import { errorMessageClassName, iconWithMarginClassName, primaryButtonClassName, smallModalContainerClassName, standardTextInputStyles } from "../../styles";
 import { EditFileVersionNameModalProps } from "./editFileVersionNameModal.types";
 
 export const EditFileVersionNameModal = (props: EditFileVersionNameModalProps): JSX.Element => {
@@ -31,18 +30,18 @@ export const EditFileVersionNameModal = (props: EditFileVersionNameModalProps): 
     };
 
     return (
-        <Stack className={modalContainerClassName} verticalAlign="space-between">
+        <Stack className={smallModalContainerClassName} verticalAlign="space-between">
             <Stack horizontal>
                 <TextField
                     value={name}
                     onChange={(event, newValue) => setName(newValue ?? "")}
-                    styles={nameStyles}
+                    styles={standardTextInputStyles}
                     label="Version Name"
                 />
             </Stack>
-            <button className={buttonClassName} onClick={handleModifyName}>
+            <button className={primaryButtonClassName} onClick={handleModifyName}>
                 <Icon
-                    className={iconClassName}
+                    className={iconWithMarginClassName}
                     iconName="Save"
                 />
                 Save

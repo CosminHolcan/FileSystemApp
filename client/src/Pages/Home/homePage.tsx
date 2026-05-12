@@ -1,19 +1,18 @@
 import { DetailsList, DetailsListLayoutMode, IColumn, Icon, Modal, SelectionMode, Stack, StackItem } from "@fluentui/react";
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AddFileModal } from "../../Components/AddFileModal/addFileModal";
 import { useNotification } from "../../Components/Notification/notification";
 import { FileLocation } from "../../Enums/FileLocation";
 import { Redundancy } from "../../Enums/Redundancy";
 import { IAppFile } from "../../Models/AppFile";
 import { AppFilesService } from "../../services";
+import { iconWithMarginClassName, pageContainerClassName, pageListContainerClassName, pageTitleClassName, primaryButtonClassName } from "../../styles";
 import { getDisplayStringLocation, IsNullOrUndefined } from "../../utils";
-import { buttonClassName, containerClassName, iconClassName, listContainerClassName, titleClassName } from "./homePage.styles";
 
 export const HomePage = (): JSX.Element => {
     const navigate = useNavigate();
     const notify = useNotification();
-    const location = useLocation();
 
     const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
 
@@ -98,14 +97,14 @@ export const HomePage = (): JSX.Element => {
 
 
     return (
-        <Stack className={containerClassName}>
+        <Stack className={pageContainerClassName}>
             <Modal isOpen={isModalOpen} onDismiss={() => setIsModalOpen(false)}>
                 <AddFileModal
                     onAddedFile={handleAddFile}
                     onError={handleErrorAddFile}
                 />
             </Modal>
-            <Stack className={titleClassName} horizontal horizontalAlign="space-between">
+            <Stack className={pageTitleClassName} horizontal horizontalAlign="space-between">
                 <StackItem style={{ fontSize: "25px", color: "#004e8c" }}>
                     File System App
                 </StackItem>
@@ -114,23 +113,23 @@ export const HomePage = (): JSX.Element => {
                 </StackItem>
             </Stack>
             <Stack horizontal horizontalAlign="end" tokens={{ childrenGap: 20 }}>
-                <button className={buttonClassName} onClick={() => setIsModalOpen(true)}>
+                <button className={primaryButtonClassName} onClick={() => setIsModalOpen(true)}>
                     <Icon
                         iconName="Add"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Add File
                 </button>
-                <button className={buttonClassName} onClick={handleLogout}>
+                <button className={primaryButtonClassName} onClick={handleLogout}>
                     <Icon
                         iconName="SignOut"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Logout
                 </button>
             </Stack>
             {files?.length > 0 &&
-                <div className={listContainerClassName}>
+                <div className={pageListContainerClassName}>
                     <DetailsList
                         items={files}
                         columns={columns}

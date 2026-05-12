@@ -2,10 +2,9 @@ import { Icon, Label, Stack, TextField } from "@fluentui/react";
 import React from "react";
 import { IAddFileVersionDTO } from "../../DTO/AddFileVersionDTO";
 import { IBaseDTO } from "../../DTO/BaseDTO";
-import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
 import { AppFilesService, FileVersionsService } from "../../services";
+import { errorMessageClassName, iconWithMarginClassName, primaryButtonClassName, smallModalContainerClassName, standardTextInputStyles } from "../../styles";
 import { IsNullOrUndefined } from "../../utils";
-import { errorMessageClassName, modalContainerClassName, nameStyles } from "./uploadNewContentModal.styles";
 import { UploadNewContentModalProps } from "./uploadNewContentModal.types";
 
 export const UploadNewContentModal = (props: UploadNewContentModalProps): JSX.Element => {
@@ -88,12 +87,12 @@ export const UploadNewContentModal = (props: UploadNewContentModalProps): JSX.El
     };
 
     return (
-        <Stack className={modalContainerClassName} verticalAlign="space-between">
+        <Stack className={smallModalContainerClassName} verticalAlign="space-between">
             {props.versioning &&
                 <TextField
                     value={name}
                     onChange={(event, newValue) => setName(newValue ?? "")}
-                    styles={nameStyles}
+                    styles={standardTextInputStyles}
                     placeholder="Version name"
                 />
             }
@@ -104,9 +103,9 @@ export const UploadNewContentModal = (props: UploadNewContentModalProps): JSX.El
                     onChange={onFileChange}
                 />
             </Stack>
-            <button className={buttonClassName} onClick={handleAddVersion}>
+            <button className={primaryButtonClassName} onClick={handleAddVersion}>
                 <Icon
-                    className={iconClassName}
+                    className={iconWithMarginClassName}
                     iconName="Save"
                 />
                 Save

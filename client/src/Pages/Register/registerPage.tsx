@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { IRegisterUserDTO } from "../../DTO/RegisterUserDTO";
 import { UsersService } from "../../services";
-import { ButtonLoginStyle, ButtonRegisterStyle, ErrorMessageStyle, LabelStyle, MiddleFieldContainerStyle, RegisterContainerStyle, RegisterFormContainerStyle, RepeatPasswordContainerStyle } from "./registerPage.styles";
+import { authButtonLargeStyle, authButtonLargeWithMarginStyle, authErrorMessageSmallStyle, authLabelSmallStyle, authPageBackgroundStyle, fieldContainerStyle, registerFormContainerStyle, repeatPasswordFieldContainerStyle } from "../../styles";
 
 export const RegisterPage = (): JSX.Element => {
     const navigate = useNavigate();
@@ -56,10 +56,10 @@ export const RegisterPage = (): JSX.Element => {
     }
 
     return (
-        <Stack style={RegisterContainerStyle} horizontalAlign="center" verticalAlign="center">
-            <Stack style={RegisterFormContainerStyle}>
-                <StackItem style={MiddleFieldContainerStyle}>
-                    <Label style={LabelStyle}>
+        <Stack style={authPageBackgroundStyle} horizontalAlign="center" verticalAlign="center">
+            <Stack style={registerFormContainerStyle}>
+                <StackItem style={fieldContainerStyle}>
+                    <Label style={authLabelSmallStyle}>
                         Email
                     </Label>
                     <TextField
@@ -68,8 +68,8 @@ export const RegisterPage = (): JSX.Element => {
                         onChange={(event: any) => setEmail(event.target.value)}
                     />
                 </StackItem>
-                <StackItem style={MiddleFieldContainerStyle}>
-                    <Label style={LabelStyle}>
+                <StackItem style={fieldContainerStyle}>
+                    <Label style={authLabelSmallStyle}>
                         First Name
                     </Label>
                     <TextField
@@ -78,8 +78,8 @@ export const RegisterPage = (): JSX.Element => {
                         onChange={(event: any) => setFirstName(event.target.value)}
                     />
                 </StackItem>
-                <StackItem style={MiddleFieldContainerStyle}>
-                    <Label style={LabelStyle}>
+                <StackItem style={fieldContainerStyle}>
+                    <Label style={authLabelSmallStyle}>
                         Last Name
                     </Label>
                     <TextField
@@ -88,8 +88,8 @@ export const RegisterPage = (): JSX.Element => {
                         onChange={(event: any) => setLastName(event.target.value)}
                     />
                 </StackItem>
-                <StackItem style={MiddleFieldContainerStyle}>
-                    <Label style={LabelStyle}>
+                <StackItem style={fieldContainerStyle}>
+                    <Label style={authLabelSmallStyle}>
                         Password
                     </Label>
                     <TextField
@@ -99,8 +99,8 @@ export const RegisterPage = (): JSX.Element => {
                         onChange={(event: any) => setPassword(event.target.value)}
                     />
                 </StackItem>
-                <StackItem style={RepeatPasswordContainerStyle}>
-                    <Label style={LabelStyle}>
+                <StackItem style={repeatPasswordFieldContainerStyle}>
+                    <Label style={authLabelSmallStyle}>
                         Repeat Password
                     </Label>
                     <TextField
@@ -111,10 +111,10 @@ export const RegisterPage = (): JSX.Element => {
                     />
                 </StackItem>
                 <Stack horizontalAlign="center" horizontal>
-                    <button style={ButtonRegisterStyle} onClick={handleSubmit}>Register</button>
-                    <button style={ButtonLoginStyle} onClick={redirectLoginPage}>Already having an account ?</button>
+                    <button style={authButtonLargeWithMarginStyle} onClick={handleSubmit}>Register</button>
+                    <button style={authButtonLargeStyle} onClick={redirectLoginPage}>Already having an account ?</button>
                 </Stack>
-                <Label style={ErrorMessageStyle}>
+                <Label style={authErrorMessageSmallStyle}>
                     {errorMessage}
                 </Label>
             </Stack>

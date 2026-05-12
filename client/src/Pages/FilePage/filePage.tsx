@@ -6,8 +6,9 @@ import { useNotification } from "../../Components/Notification/notification";
 import { UploadNewContentModal } from "../../Components/UploadNewContentModal/uploadNewContentModal";
 import { IAppFile } from "../../Models/AppFile";
 import { AppFilesService } from "../../services";
+import { iconWithMarginClassName, pageContainerClassName, pageTitleClassName, primaryButtonClassName, primaryButtonWithMarginClassName, smallTextInputStyles } from "../../styles";
 import { downloadBlobWithName, IsNullOrUndefined } from "../../utils";
-import { buttonClassName, containerClassName, extenssionClassName, iconClassName, nameStyles, saveButtonClassName, titleClassName } from "./filePage.styles";
+import { extenssionClassName } from "./filePage.styles";
 
 export const FilePage = (): JSX.Element => {
     const { fileId } = useParams<{ fileId: string }>();
@@ -75,10 +76,10 @@ export const FilePage = (): JSX.Element => {
         }
 
         const newFileName: string = `${name}.${extension}`;
-        
+
         AppFilesService.UpdateFileName(fileId, { jwt: localStorage.getItem("jwt") as string, newFileName: newFileName })
             .then(function (response) {
-                setFile({...file, name: newFileName})
+                setFile({ ...file, name: newFileName })
                 notify("Name was succesfully changed.");
             })
             .catch(function (error) {
@@ -87,7 +88,7 @@ export const FilePage = (): JSX.Element => {
     }
 
     return (
-        <Stack className={containerClassName}>
+        <Stack className={pageContainerClassName}>
             {fileId && file &&
                 <Modal isOpen={isModalOpen} onDismiss={() => setIsModalOpen(false)}>
                     <UploadNewContentModal
@@ -99,7 +100,7 @@ export const FilePage = (): JSX.Element => {
                     />
                 </Modal>
             }
-            <Stack className={titleClassName} horizontal horizontalAlign="space-between">
+            <Stack className={pageTitleClassName} horizontal horizontalAlign="space-between">
                 <StackItem style={{ fontSize: "25px", color: "#004e8c" }}>
                     File System App
                 </StackItem>
@@ -108,31 +109,31 @@ export const FilePage = (): JSX.Element => {
                 </StackItem>
             </Stack>
             <Stack horizontal horizontalAlign="end" tokens={{ childrenGap: 20 }}>
-                <button className={buttonClassName} onClick={() => setIsModalOpen(true)}>
+                <button className={primaryButtonClassName} onClick={() => setIsModalOpen(true)}>
                     <Icon
                         iconName="Upload"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Upload
                 </button>
-                <button className={buttonClassName} onClick={handleDownload}>
+                <button className={primaryButtonClassName} onClick={handleDownload}>
                     <Icon
                         iconName="Download"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Download
                 </button>
-                <button className={buttonClassName} onClick={handleDelete}>
+                <button className={primaryButtonClassName} onClick={handleDelete}>
                     <Icon
                         iconName="Delete"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Delete
                 </button>
-                <button className={buttonClassName} onClick={() => navigate("/home")}>
+                <button className={primaryButtonClassName} onClick={() => navigate("/home")}>
                     <Icon
                         iconName="Home"
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                     />
                     Home
                 </button>
@@ -143,7 +144,7 @@ export const FilePage = (): JSX.Element => {
                         <TextField
                             value={name}
                             onChange={(event, newValue) => setName(newValue ?? "")}
-                            styles={nameStyles}
+                            styles={smallTextInputStyles}
                             label="Name"
                         />
                         {!IsNullOrUndefined(file) &&
@@ -151,9 +152,9 @@ export const FilePage = (): JSX.Element => {
                                 {"." + extension}
                             </div>
                         }
-                        <button className={saveButtonClassName} onClick={handleSaveNewName}>
+                        <button className={primaryButtonWithMarginClassName} onClick={handleSaveNewName}>
                             <Icon
-                                className={iconClassName}
+                                className={iconWithMarginClassName}
                                 iconName="Save"
                             />
                             Save

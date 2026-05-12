@@ -3,11 +3,10 @@ import React from "react";
 import { ICreateFileDTO } from "../../DTO/CreateFileDTO";
 import { FileLocation } from "../../Enums/FileLocation";
 import { Redundancy } from "../../Enums/Redundancy";
-import { buttonClassName, iconClassName } from "../../Pages/Home/homePage.styles";
 import { AppFilesService } from "../../services";
+import { errorMessageClassName, iconWithMarginClassName, largeModalContainerClassName, largeTextInputStyles, primaryButtonClassName, textInputWithMarginStyles } from "../../styles";
 import { IsNullOrUndefined } from "../../utils";
-import { useNotification } from "../Notification/notification";
-import { errorMessageClassName, extenssionClassName, modalContainerClassName, nameStyles, versionNameStyles } from "./addFileModal.styles";
+import { extenssionClassName } from "./addFileModal.styles";
 import { AddFileModalProps } from "./addFileModal.types";
 
 export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
@@ -128,13 +127,13 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
     };
 
     return (
-        <Stack horizontal className={modalContainerClassName} tokens={{ childrenGap: 50 }}>
+        <Stack horizontal className={largeModalContainerClassName} tokens={{ childrenGap: 50 }}>
             <Stack style={{ width: '52%' }} verticalAlign="space-between">
                 <Stack horizontal>
                     <TextField
                         value={name}
                         onChange={(event, newValue) => setName(newValue ?? "")}
-                        styles={nameStyles}
+                        styles={largeTextInputStyles}
                         label="Name"
                     />
                     {!IsNullOrUndefined(file) &&
@@ -181,15 +180,15 @@ export const AddFileModal = (props: AddFileModalProps): JSX.Element => {
                             <TextField
                                 value={versionFileName}
                                 onChange={(event, newValue) => setVersionFileName(newValue ?? "")}
-                                styles={versionNameStyles}
+                                styles={textInputWithMarginStyles}
                                 label="Version Name"
                             />
                         }
                     </div>
                 </Stack>
-                <button className={buttonClassName} onClick={handleSaveFile}>
+                <button className={primaryButtonClassName} onClick={handleSaveFile}>
                     <Icon
-                        className={iconClassName}
+                        className={iconWithMarginClassName}
                         iconName="Save"
                     />
                     Save

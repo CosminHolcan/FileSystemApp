@@ -1,6 +1,6 @@
 import { mergeStyles } from "@fluentui/react";
 
-export const containerClassName: string = mergeStyles({
+export const notificationContainerClassName: string = mergeStyles({
     position: "fixed",
     top: 110,
     right: 15,
@@ -10,7 +10,7 @@ export const containerClassName: string = mergeStyles({
     zIndex: 1000
 });
 
-export const notificationClassName: string = mergeStyles({
+export const notificationBadgeClassName: string = mergeStyles({
     backgroundColor: "#f2f4f8",
     color: "#0078d4",
     padding: "15px 20px",
