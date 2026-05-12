@@ -28,7 +28,7 @@ namespace server.BLL
             AppFile appFile = await _appFilesDAL.GetFileByIdWithStorageAccount(dto.OriginalFileId);
             if (appFile.UserId != userId)
             {
-                _logger.LogWarning("Unauthorized AddVersion attempt by user {UserId} for original file {OriginalFileId}", userId, dto.OriginalFileId);
+                _logger.LogError("Unauthorized AddVersion attempt by user {UserId} for original file {OriginalFileId}", userId, dto.OriginalFileId);
                 throw new Exception("Unauthorized operation.");
             }
 
@@ -161,7 +161,7 @@ namespace server.BLL
 
             if (file.UserId != userId)
             {
-                _logger.LogWarning("Unauthorized DeleteFileVersion attempt for fileVersion {FileVersionId} by user {UserId}", fileVersionId, userId);
+                _logger.LogError("Unauthorized DeleteFileVersion attempt for fileVersion {FileVersionId} by user {UserId}", fileVersionId, userId);
                 throw new Exception("Unauthorized operation.");
             }
 
@@ -223,7 +223,7 @@ namespace server.BLL
 
             if (file.UserId != userId)
             {
-                _logger.LogWarning("Unauthorized UpdateFileVersionName attempt for fileVersion {FileVersionId} by user {UserId}", fileVersionId, userId);
+                _logger.LogError("Unauthorized UpdateFileVersionName attempt for fileVersion {FileVersionId} by user {UserId}", fileVersionId, userId);
                 throw new Exception("Unauthorized operation.");
             }
 

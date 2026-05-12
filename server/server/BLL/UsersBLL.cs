@@ -22,19 +22,19 @@ namespace server.BLL
 
             if (string.IsNullOrEmpty(dto.Email))
             {
-                _logger.LogWarning("RegisterUser validation failed: empty email");
+                _logger.LogError("RegisterUser validation failed: empty email");
                 throw new Exception("Invalid email.");
             }
 
             if (string.IsNullOrEmpty(dto.Password))
             {
-                _logger.LogWarning("RegisterUser validation failed: empty password for email {Email}", dto.Email);
+                _logger.LogError("RegisterUser validation failed: empty password for email {Email}", dto.Email);
                 throw new Exception("Invalid password.");
             }
 
             if (dto.Password.Length < 6)
             {
-                _logger.LogWarning("RegisterUser validation failed: password too short for email {Email}", dto.Email);
+                _logger.LogError("RegisterUser validation failed: password too short for email {Email}", dto.Email);
                 throw new Exception("Password too short! It should be at least 6 characters.");
             }
 
@@ -64,13 +64,13 @@ namespace server.BLL
             User existingUser = await this._usersDAL.GetUserByEmail(dto.Email);
             if (existingUser == null)
             {
-                _logger.LogWarning("LoginUser failed: no user with email {Email}", dto.Email);
+                _logger.LogError("LoginUser failed: no user with email {Email}", dto.Email);
                 throw new Exception("There is no user with this email");
             }
 
             if (existingUser.Password != EncryptionDecryption.Encrypt(dto.Password))
             {
-                _logger.LogWarning("LoginUser failed: incorrect password for email {Email}", dto.Email);
+                _logger.LogError("LoginUser failed: incorrect password for email {Email}", dto.Email);
                 throw new Exception("Incorrect password");
             }
 

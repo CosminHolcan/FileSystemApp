@@ -103,7 +103,7 @@ namespace server.BLL
             AppFile appFile = await _appFilesDAL.GetFileByIdWithStorageAccount(fileId), replicaFile = null;
             if (appFile.UserId != userId)
             {
-                _logger.LogWarning("Unauthorized UploadNewContent attempt for file {FileId} by user {UserId}", fileId, userId);
+                _logger.LogError("Unauthorized UploadNewContent attempt for file {FileId} by user {UserId}", fileId, userId);
                 throw new Exception("Unauthorized operation.");
             }
 
@@ -198,7 +198,7 @@ namespace server.BLL
             AppFile appFile = await this._appFilesDAL.GetFullFileById(fileId);
             if (appFile.UserId != userId)
             {
-                _logger.LogWarning("Unauthorized GetFileByIdWithVersions attempt for file {FileId} by user {UserId}", fileId, userId);
+                _logger.LogError("Unauthorized GetFileByIdWithVersions attempt for file {FileId} by user {UserId}", fileId, userId);
                 throw new Exception("Unauthorized operation.");
             }
 
@@ -282,7 +282,7 @@ namespace server.BLL
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Primary check failed for file {FileId}, trying the other replica", firstCheckedFile.Id);
+                _logger.LogError(ex, "Primary check failed for file {FileId}, trying the other replica", firstCheckedFile.Id);
                 try
                 {
                     BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(secondCheckedFile.StorageAccount.BlobServicePath), new DefaultAzureCredential());
@@ -314,7 +314,7 @@ namespace server.BLL
 
             if (file.UserId != userId)
             {
-                _logger.LogWarning("Unauthorized DeleteFile attempt for file {FileId} by user {UserId}", fileId, userId);
+                _logger.LogError("Unauthorized DeleteFile attempt for file {FileId} by user {UserId}", fileId, userId);
                 throw new Exception("Unauthorized operation.");
             }
 
@@ -355,7 +355,7 @@ namespace server.BLL
             AppFile appFile = await this._appFilesDAL.GetFileById(fileId);
             if (appFile.UserId != userId)
             {
-                _logger.LogWarning("Unauthorized UpdateFileName attempt for file {FileId} by user {UserId}", fileId, userId);
+                _logger.LogError("Unauthorized UpdateFileName attempt for file {FileId} by user {UserId}", fileId, userId);
                 throw new Exception("Unauthorized operation.");
             }
 
