@@ -60,10 +60,9 @@ jobs:
 
       # Build and publish the .NET backend API project
       - name: Build and publish the backend
-        working-directory: ./server/server
         run: |
-          dotnet restore
-          dotnet publish -c Release -o publish
+          dotnet restore ./server/server/server.csproj
+          dotnet publish ./server/server/server.csproj -c Release -o publish
 
       # Login to Azure using OIDC and GitHub secrets
       - name: Login to Azure

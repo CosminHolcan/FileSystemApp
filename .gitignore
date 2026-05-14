@@ -360,6 +360,6 @@ yarn-error.log*
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
+*.sln*
 *.sw*
 /server/server/.github/copilot-instructions.md

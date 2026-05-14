@@ -1,8 +1,8 @@
 using Azure.Monitor.OpenTelemetry.AspNetCore;
+using BLL;
+using DAL;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Trace;
-using server.BLL;
-using server.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 

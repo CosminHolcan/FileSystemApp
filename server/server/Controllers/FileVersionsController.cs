@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using server.BLL;
-using server.DAL.Entities;
-using server.DTO;
-using server.Utils;
+﻿using BLL;
+using DAL.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Shared;
+using Shared.DTO;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 

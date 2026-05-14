@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using server.BLL;
-using server.DTO;
-using server.Utils;
+﻿using BLL;
+using Microsoft.AspNetCore.Mvc;
+using Shared;
+using Shared.DTO;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace server.Controllers
