@@ -76,4 +76,4 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: filesystemapp
-          package: ./server/server/publish
+          package: ${{ github.workspace }}/publish
