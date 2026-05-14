@@ -61,7 +61,7 @@ jobs:
       # Build and publish the .NET backend API project
       - name: Build and publish the backend
         run: |
-          dotnet publish ./server/server/server.csproj -c Release -o ./publish
+          dotnet publish ./server/server/server.csproj -c Release -o ${{ github.workspace }}/publish
 
       # Login to Azure using OIDC and GitHub secrets
       - name: Login to Azure
