@@ -13,7 +13,7 @@ public class RestoreFileCopies
         _logger = loggerFactory.CreateLogger<RestoreFileCopies>();
     }
 
-    [Function("Function1")]
+    [Function("RestoreFileCopies")]
     public void Run([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer)
     {
         _logger.LogInformation("C# Timer trigger function executed at: {executionTime}", DateTime.Now);
