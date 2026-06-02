@@ -71,6 +71,14 @@ namespace DAL
                 .FirstOrDefaultAsync(f => f.Id == fileId);
         }
 
+        public async Task<List<AppFile>> GetFilesWithReplica()
+        {
+            return await this._dbContext.AppFiles
+                .Include(f => f.StorageAccount)
+                .Where(f => f.ReplicaId != null)
+                .ToListAsync();
+        }
+
         public async Task DeleteFile(AppFile appFile)
         {
             _dbContext.AppFiles.Remove(appFile);

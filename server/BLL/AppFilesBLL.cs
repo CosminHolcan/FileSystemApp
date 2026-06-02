@@ -374,6 +374,33 @@ namespace BLL
             }
         }
 
+        public async Task<List<(AppFile Original, AppFile Replica)>> GetFilesWithReplicasGrouped()
+        {
+            _logger.LogDebug("GetFilesWithReplicasGrouped called");
+
+            List<AppFile> files = await this._appFilesDAL.GetFilesWithReplica();
+
+            Dictionary<Guid, AppFile> filesById = files.ToDictionary(f => f.Id);
+            List<(AppFile Original, AppFile Replica)> pairs = new List<(AppFile Original, AppFile Replica)>();
+
+            foreach (AppFile file in files)
+            {
+                if (file.IsReplica == true)
+                    continue;
+
+                if (file.ReplicaId == null)
+                    continue;
+
+                if (filesById.TryGetValue(file.ReplicaId.Value, out var replica))
+                {
+                    pairs.Add((file, replica));
+                }
+            }
+
+            _logger.LogInformation("GetFilesWithReplicasGrouped returning {Count} pairs", pairs.Count);
+            return pairs;
+        }
+
         private async Task<string> UploadFileToBlob(StorageAccount storageAccount, Guid fileId, IFormFile file, string originalFileName, bool? versioning)
         {
             _logger.LogDebug("UploadFileToBlob called for file {FileId} using storage {StorageId}", fileId, storageAccount?.Id);
