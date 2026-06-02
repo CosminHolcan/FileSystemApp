@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../.github/workflows/functions.yaml" />
+    <File Path="../.github/workflows/main.yml" />
+  </Folder>
+  <Project Path="BLL/BLL.csproj" />
+  <Project Path="DAL/DAL.csproj" />
+  <Project Path="Functions/Functions.csproj" Id="34e57810-3f26-42e0-9d48-13ccb52e3b84" />
+  <Project Path="server/Server.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+</Solution>
