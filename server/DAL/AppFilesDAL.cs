@@ -80,6 +80,13 @@ namespace DAL
                 .ToListAsync();
         }
 
+        public async Task<List<AppFile>> GetAllFilesWithStorageAccount()
+        {
+            return await this._dbContext.AppFiles
+                .Include(f => f.StorageAccount)
+                .ToListAsync();
+        }
+
         public async Task DeleteFile(AppFile appFile)
         {
             _dbContext.AppFiles.Remove(appFile);

@@ -28,6 +28,37 @@ namespace BLL
             this._logger = logger;
         }
 
+        public async Task ChangeAccessTiers()
+        {
+            _logger.LogInformation("ChangeAccessTiers called");
+            List<AppFile> files = await _appFilesDAL.GetAllFilesWithStorageAccount();
+
+            foreach (var f in files)
+            {
+                try
+                {
+                    TimeSpan idle = DateTime.Now - f.LastInteraction;
+                    AccessTier tier = AccessTier.Cool;
+                    if (idle.TotalDays < 7)
+                        tier = AccessTier.Hot;
+                    else if (idle.TotalDays < 30)
+                        tier = AccessTier.Cool;
+                    else
+                        tier = AccessTier.Archive;
+
+                    // change tier on the blob
+                    BlobServiceClient client = new BlobServiceClient(new Uri(f.StorageAccount.BlobServicePath), new DefaultAzureCredential());
+                    var container = client.GetBlobContainerClient("container");
+                    var blob = container.GetBlobClient(Shared.Helper.GetAzureFileName(f.Id, f.Name));
+                    await blob.SetAccessTierAsync(tier);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to change access tier for file {FileId}", f.Id);
+                }
+            }
+        }
+
         public async Task<AppFileDTO> AddFile(CreateFileDTO dto, Guid userId, IFormFile file)
         {
             _logger.LogInformation("AddFile called by user {UserId} for file name {FileName}", userId, dto?.Name);
@@ -399,6 +430,116 @@ namespace BLL
 
             _logger.LogInformation("GetFilesWithReplicasGrouped returning {Count} pairs", pairs.Count);
             return pairs;
+        }
+
+        public async Task RestorePair(AppFile newer, AppFile older)
+        {
+            _logger.LogInformation("RestorePair called for newer={NewerId} older={OlderId}", newer.Id, older.Id);
+            if (newer.StorageAccount.Versioning)
+            {
+                _logger.LogInformation("Version-aware restore for pair {NewerId}-{OlderId}", newer.Id, older.Id);
+                await RestorePairWithVersions(newer, older);
+            }
+            else
+            {
+                await CopyCurrentBlobFromTo(newer, older);
+                await _appFilesDAL.UpdateTimeInteractionsForFile(older.Id, newer.LastUpdate, true);
+            }
+        }
+
+        private async Task RestorePairWithVersions(AppFile newer, AppFile older)
+        {
+            List<FileVersion> newerVersions = newer.Versions?.OrderBy(v => v.CreationTime).ToList() ?? new List<DAL.Entities.FileVersion>();
+            List<FileVersion> olderVersions = older.Versions?.OrderBy(v => v.CreationTime).ToList() ?? new List<DAL.Entities.FileVersion>();
+
+            BlobServiceClient newerClient = new BlobServiceClient(new Uri(newer.StorageAccount.BlobServicePath), new DefaultAzureCredential());
+            BlobServiceClient olderClient = new BlobServiceClient(new Uri(older.StorageAccount.BlobServicePath), new DefaultAzureCredential());
+
+            BlobContainerClient newerContainer = newerClient.GetBlobContainerClient("container");
+            BlobContainerClient olderContainer = olderClient.GetBlobContainerClient("container");
+
+
+            await CopyMissingVersions(newer, older, newerVersions, olderVersions, newerContainer, olderContainer);
+            var latestVersion = newerVersions.OrderBy(v => v.CreationTime).LastOrDefault();
+
+            if (latestVersion != null)
+            {
+                try
+                {
+                    var srcBlob = newerContainer.GetBlobClient(Shared.Helper.GetAzureFileName(newer.Id, newer.Name)).WithVersion(latestVersion.AzureId);
+                    var download = await srcBlob.DownloadAsync();
+                    using (var s = download.Value.Content)
+                    {
+                        var dstCurrent = olderContainer.GetBlobClient(Shared.Helper.GetAzureFileName(older.Id, older.Name));
+                        await dstCurrent.UploadAsync(s, overwrite: true);
+                    }
+
+                    await _appFilesDAL.UpdateTimeInteractionsForFile(older.Id, latestVersion.CreationTime, true);
+                    await _appFilesDAL.UpdateTimeInteractionsForFile(newer.Id, latestVersion.CreationTime, true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to apply latest version {VersionId} to older file {OlderId}", latestVersion.AzureId, older.Id);
+                }
+            }
+            else
+            {
+                await CopyCurrentBlobFromTo(newer, older);
+                await _appFilesDAL.UpdateTimeInteractionsForFile(older.Id, newer.LastUpdate, true);
+            }
+        }
+
+        private async Task CopyMissingVersions(AppFile newer, AppFile older, List<FileVersion> newerVersions, List<FileVersion> olderVersions, BlobContainerClient newerContainer, BlobContainerClient olderContainer)
+        {
+            foreach (FileVersion newerVersion in newerVersions)
+            {
+                if (!olderVersions.Any(ov => ov.CreationTime == newerVersion.CreationTime))
+                {
+                    try
+                    {
+                        var srcBlob = newerContainer.GetBlobClient(Shared.Helper.GetAzureFileName(newer.Id, newer.Name)).WithVersion(newerVersion.AzureId);
+                        var download = await srcBlob.DownloadAsync();
+                        using (var s = download.Value.Content)
+                        {
+                            var uploadBlob = olderContainer.GetBlobClient(Shared.Helper.GetAzureFileName(older.Id, older.Name));
+                            var result = await uploadBlob.UploadAsync(s, overwrite: false);
+                            string newVersionId = result.Value.VersionId;
+
+                            await _fileVersionsDAL.AddVersion(new DAL.Entities.FileVersion
+                            {
+                                Name = newerVersion.Name,
+                                AzureId = newVersionId,
+                                OriginalFileId = older.Id,
+                                CreationTime = newerVersion.CreationTime
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to copy version {VersionId} from {NewerId} to {OlderId}", newerVersion.AzureId, newer.Id, older.Id);
+                    }
+                }
+            }
+        }
+
+        private async Task CopyCurrentBlobFromTo(AppFile src, AppFile dst)
+        {
+            _logger.LogInformation("Copying current blob from {SrcId} to {DstId}", src.Id, dst.Id);
+
+            BlobServiceClient srcClient = new BlobServiceClient(new Uri(src.StorageAccount.BlobServicePath), new DefaultAzureCredential());
+            BlobServiceClient dstClient = new BlobServiceClient(new Uri(dst.StorageAccount.BlobServicePath), new DefaultAzureCredential());
+
+            var srcContainer = srcClient.GetBlobContainerClient("container");
+            var dstContainer = dstClient.GetBlobContainerClient("container");
+
+            var srcBlob = srcContainer.GetBlobClient(Shared.Helper.GetAzureFileName(src.Id, src.Name));
+            var dstBlob = dstContainer.GetBlobClient(Shared.Helper.GetAzureFileName(dst.Id, dst.Name));
+
+            var download = await srcBlob.DownloadAsync();
+            using (var stream = download.Value.Content)
+            {
+                await dstBlob.UploadAsync(stream, overwrite: true);
+            }
         }
 
         private async Task<string> UploadFileToBlob(StorageAccount storageAccount, Guid fileId, IFormFile file, string originalFileName, bool? versioning)
