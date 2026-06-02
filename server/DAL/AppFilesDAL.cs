@@ -75,6 +75,7 @@ namespace DAL
         {
             return await this._dbContext.AppFiles
                 .Include(f => f.StorageAccount)
+                .Include(f => f.Versions)
                 .Where(f => f.ReplicaId != null)
                 .ToListAsync();
         }
