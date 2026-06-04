@@ -1,11 +1,6 @@
 # FileSystemApp
 
-FileSystemApp is a native cloud web application that lets users securely store and manage files in Azure Blob Storage. It demonstrates a full-stack solution: a .NET 10 backend (Web API + Entity Framework Core), a React + TypeScript frontend, and Azure Functions for background maintenance tasks. The solution supports configurable redundancy, optional file versioning, and a custom cross-region redundancy mode.
-
-## Short project summary
-
-- Purpose: allow users to register/login and store files with metadata (region, redundancy, versioning). Users can preview, download, update files, and — when versioning is enabled — add and compare file versions.
-- Technologies: .NET 10, EF Core, Azure Blob Storage, Azure Functions (isolated worker), React + TypeScript.
+FileSystemApp is a native cloud web application that lets users securely store and manage files in Azure Blob Storage. It demonstrates a full-stack solution: a .NET 10 backend (Web API + Entity Framework Core), a React + TypeScript frontend, and Azure Functions for background maintenance tasks. The solution supports configurable redundancy, optional file versioning, and a custom cross-region redundancy mode. The user interface is designed for non-cloud users — it hides low-level Azure concepts and exposes only the meaningful configuration choices.
 
 ## Key features
 
@@ -13,7 +8,6 @@ FileSystemApp is a native cloud web application that lets users securely store a
 - Optional file versioning: when enabled, file uploads create immutable versions recorded in the database, and users can compare/download specific versions.
 - File operations: upload, download, preview, rename, delete, and add versions.
 - Background synchronization for custom redundancy: a dedicated Azure Function periodically inspects files that have replicas and synchronizes content and versions so both copies remain consistent.
-- Storage access tier automation: weekly access-tier sweeper moves less-used blobs to Cool / Archive tiers to optimize cost.
 
 ## Architecture overview
 
@@ -59,7 +53,7 @@ Notes on version handling
 - There are separate cases for the `main` (web app) and `functions` branches. The repository contains dedicated workflow YAML(s) that:
   - Use OIDC for authentication to Azure.
   - Deploy the web app when changes are pushed to `main`.
-  - Deploy the Function App when changes are pushed to the `functions` branch (the repository contains a YAML file that triggers on this branch).
+  - Deploy the Function App when changes are pushed to the `functions` branch.
 
 This separation allows function implementation and deployment to be developed/tested independently from the main web app.
 
